@@ -1,0 +1,1 @@
+enum BottomNavBarStates{InitialState, NewPostState}
