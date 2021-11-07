@@ -8,6 +8,7 @@ AppBar buildChatDetailsViewAppBar(
   @required String uName,
 }) {
   return AppBar(
+    elevation: 2.0,
     titleSpacing: 0.0,
     title: Row(
       children: [
@@ -31,21 +32,21 @@ AppBar buildChatDetailsViewAppBar(
   );
 }
 
-class BuildChatBubble extends StatelessWidget {
+class BuildMessageBubble extends StatelessWidget {
   final Color color;
-  final String chatText, chatImage;
+  final String messageText, messageImage;
   final Radius bubbleRadiusSender, bubbleRadiusReceiver;
   final AlignmentGeometry bubbleDirection;
   final CrossAxisAlignment bubbleAxisDirection;
 
-  const BuildChatBubble({
+  const BuildMessageBubble({
     @required this.color,
     @required this.bubbleRadiusSender,
     @required this.bubbleRadiusReceiver,
     @required this.bubbleDirection,
     @required this.bubbleAxisDirection,
-    this.chatText,
-    this.chatImage,
+    this.messageText,
+    this.messageImage,
   });
 
   @override
@@ -55,7 +56,6 @@ class BuildChatBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: bubbleAxisDirection,
         children: [
-          if (chatText != null)
           Container(
             constraints: BoxConstraints(
               maxWidth: (MediaQuery.of(context).size.width / 2) - 40.0,
@@ -71,16 +71,16 @@ class BuildChatBubble extends StatelessWidget {
                   bottomStart: bubbleRadiusReceiver),
             ),
             child: Text(
-              chatText,
+              messageText,
               style: Theme.of(context).textTheme.subtitle1.copyWith(
                     fontSize: 12.0,
                     fontWeight: FontWeight.normal,
                   ),
             ),
           ),
-          if (chatImage != null)
+          if (messageImage != '')
           minimumVerticalDistance(),
-          if (chatImage != null)
+          if (messageImage != '')
             Container(
               height: 80.0,
               width: (MediaQuery.of(context).size.width / 2) - 40.0,
@@ -93,7 +93,7 @@ class BuildChatBubble extends StatelessWidget {
                     bottomStart: bubbleRadiusReceiver),
                 image: DecorationImage(
                   image: NetworkImage(
-                    chatImage,
+                    messageImage,
                   ),
                   fit: BoxFit.cover,
                 ),

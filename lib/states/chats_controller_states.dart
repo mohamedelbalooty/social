@@ -1,4 +1,4 @@
-enum ChatControllerGetUsersStates{
+enum ChatsControllerGetUsersStates{
   InitialState,
   LoadingState,
   LoadedState,

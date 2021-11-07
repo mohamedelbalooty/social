@@ -14,3 +14,7 @@ const String usersCollection = 'users';
 const String postsCollection = 'posts';
 const String likesCollection = 'likes';
 const String commentsCollection = 'comments';
+const String chatsCollection = 'chats';
+const String messagesCollection = 'messages';
+
+

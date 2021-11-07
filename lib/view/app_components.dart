@@ -828,18 +828,18 @@ class BuildEmptyListWidget extends StatelessWidget {
             Image.asset(
               'assets/images/noData.png',
               height: 220.0,
-              width: 240.0,
+              width: 250.0,
               fit: BoxFit.fill,
             ),
             Text(
               'Opps !'.toUpperCase(),
               style: const TextStyle(
-                  color: mainColor, fontSize: 28.0, height: 1.0),
+                  color: mainColor, fontSize: 28.0),
             ),
             Text(
               title,
               style: Theme.of(context).textTheme.bodyText1.copyWith(
-                  color: greyColor, fontWeight: FontWeight.normal, height: 1.1),
+                  color: greyColor, fontWeight: FontWeight.normal, height: 1.0),
             ),
           ],
         ),

@@ -10,6 +10,8 @@ import 'constants/cache_constants.dart';
 import 'controller/chat_controller.dart';
 import 'controller/comment_controller.dart';
 import 'controller/login_controller.dart';
+import 'controller/messages_controller.dart';
+import 'controller/new_message_controller.dart';
 import 'controller/new_post_controller.dart';
 import 'controller/posts_controller.dart';
 import 'controller/edit_profile_controller.dart';
@@ -57,11 +59,20 @@ class SocialApp extends StatelessWidget {
         ChangeNotifierProvider<CommentController>(
           create: (_) => CommentController(),
         ),
-        ChangeNotifierProvider<ChatController>(
-          create: (_) => ChatController(),
+        ChangeNotifierProvider<ChatsController>(
+          create: (_) => ChatsController(),
         ),
-        // ChangeNotifierProvider<CommentController>(
-        //   create: (_) => CommentController(),
+        ChangeNotifierProvider<MessagesController>(
+          create: (_) => MessagesController(),
+        ),
+        ChangeNotifierProvider<NewMessageController>(
+          create: (_) => NewMessageController(),
+        ),
+        // ChangeNotifierProvider<NewMessageController>(
+        //   create: (_) => NewMessageController(),
+        // ),
+        // ChangeNotifierProvider<NewMessageController>(
+        //   create: (_) => NewMessageController(),
         // ),
       ],
       child: MaterialApp(

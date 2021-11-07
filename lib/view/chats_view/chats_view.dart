@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:social_app/controller/chat_controller.dart';
-import 'package:social_app/states/chat_controller_states.dart';
+import 'package:social_app/states/chats_controller_states.dart';
 import 'package:social_app/view/app_components.dart';
 import 'package:social_app/view/chat_details_view/chat_details_view.dart';
 import 'chat_view_components.dart';
@@ -10,21 +10,19 @@ import 'chat_view_components.dart';
 class ChatsView extends StatelessWidget {
   static const String id = 'ChatView';
 
-  // final refreshKey = GlobalKey<RefreshIndicatorState>();
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChatController>(
+    return Consumer<ChatsController>(
       builder: (context, provider, child) {
-        if (provider.chatControllerGetUsersStates ==
-            ChatControllerGetUsersStates.InitialState) {
+        if (provider.chatsControllerGetUsersStates ==
+            ChatsControllerGetUsersStates.InitialState) {
           provider.getUsers();
           return buildCircularLoadingWidget();
-        } else if (provider.chatControllerGetUsersStates ==
-            ChatControllerGetUsersStates.LoadingState) {
+        } else if (provider.chatsControllerGetUsersStates ==
+            ChatsControllerGetUsersStates.LoadingState) {
           return buildCircularLoadingWidget();
-        } else if (provider.chatControllerGetUsersStates ==
-            ChatControllerGetUsersStates.LoadedState) {
+        } else if (provider.chatsControllerGetUsersStates ==
+            ChatsControllerGetUsersStates.LoadedState) {
           if (provider.users.length != 0) {
             return ListView.separated(
               physics: const BouncingScrollPhysics(),
@@ -38,7 +36,7 @@ class ChatsView extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            ChatDetailsView(currentUser: provider.users[index]),
+                            ChatDetailsView(receiverUser: provider.users[index]),
                       ),
                     );
                   },
