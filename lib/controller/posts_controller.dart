@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:social_app/constants/firestore_constants.dart';
@@ -9,7 +8,7 @@ import 'package:social_app/helper/user_id_helper.dart';
 import 'package:social_app/model/comment_model.dart';
 import 'package:social_app/model/error_result_model.dart';
 import 'package:social_app/model/post_model.dart';
-import 'package:social_app/states/comment_controller_states.dart';
+import 'package:social_app/states/new_comment_controller_states.dart';
 import 'package:social_app/states/posts_controller_states.dart';
 
 class PostsController extends ChangeNotifier {
@@ -95,10 +94,10 @@ class PostsController extends ChangeNotifier {
   }
 
 
-  CommentControllerPickCommentImage commentControllerPickCommentImage;
-  CommentControllerUploadCommentImageStates
-  commentControllerUploadCommentImageStates;
-  CommentControllerCreateCommentOnPost commentControllerCreateCommentOnPost;
+  NewCommentControllerPickCommentImage commentControllerPickCommentImage;
+  // NewCommentControllerUploadCommentImageStates
+  // commentControllerUploadCommentImageStates;
+  NewCommentControllerCreateComment commentControllerCreateCommentOnPost;
 
   // String get errorMessage => _errorMessage;
   // String _errorMessage;
@@ -112,11 +111,11 @@ class PostsController extends ChangeNotifier {
     if (_pickedFile != null) {
       _commentImage = File(_pickedFile.path);
       commentControllerPickCommentImage =
-          CommentControllerPickCommentImage.CommentImagePickedSuccessState;
+          NewCommentControllerPickCommentImage.CommentImagePickedSuccessState;
     } else {
       _errorMessage = 'An error occurred while taking the photo !';
       commentControllerPickCommentImage =
-          CommentControllerPickCommentImage.CommentImagePickedErrorState;
+          NewCommentControllerPickCommentImage.CommentImagePickedErrorState;
     }
     notifyListeners();
   }
@@ -197,40 +196,40 @@ class PostsController extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  List<CommentModel> get comments => _comments;
-  List<CommentModel> _comments = [];
-
-  // ErrorResult get errorResult => _errorResult;
-  // ErrorResult _errorResult;
-
-  CommentControllerGetComments commentControllerGetComments =
-      CommentControllerGetComments.InitialState;
-
-  Future<void> getComments({@required String postDocId}) async {
-    commentControllerGetComments = CommentControllerGetComments.LoadingState;
-    notifyListeners();
-    await FirebaseHelper.firestoreHelper
-        .collection(postsCollection)
-        .doc(postDocId)
-        .collection(commentsCollection)
-        .get()
-        .then((value) {
-      for (var item in value.docs) {
-        _comments.add(
-          CommentModel.fromJson(item.data()),
-        );
-        commentControllerGetComments = CommentControllerGetComments.LoadedState;
-        notifyListeners();
-      }
-    }).catchError((error) {
-      _errorResult = ErrorResult(
-        errorMessage: 'Something went wrong !',
-        errorImage: 'assets/images/error.png',
-      );
-      commentControllerGetComments = CommentControllerGetComments.ErrorState;
-      notifyListeners();
-    });
-  }
+  // List<CommentModel> get comments => _comments;
+  // List<CommentModel> _comments = [];
+  //
+  // // ErrorResult get errorResult => _errorResult;
+  // // ErrorResult _errorResult;
+  //
+  // CommentControllerGetComments commentControllerGetComments =
+  //     CommentControllerGetComments.InitialState;
+  //
+  // Future<void> getComments({@required String postDocId}) async {
+  //   commentControllerGetComments = CommentControllerGetComments.LoadingState;
+  //   notifyListeners();
+  //   await FirebaseHelper.firestoreHelper
+  //       .collection(postsCollection)
+  //       .doc(postDocId)
+  //       .collection(commentsCollection)
+  //       .get()
+  //       .then((value) {
+  //     for (var item in value.docs) {
+  //       _comments.add(
+  //         CommentModel.fromJson(item.data()),
+  //       );
+  //       commentControllerGetComments = CommentControllerGetComments.LoadedState;
+  //       notifyListeners();
+  //     }
+  //   }).catchError((error) {
+  //     _errorResult = ErrorResult(
+  //       errorMessage: 'Something went wrong !',
+  //       errorImage: 'assets/images/error.png',
+  //     );
+  //     commentControllerGetComments = CommentControllerGetComments.ErrorState;
+  //     notifyListeners();
+  //   });
+  // }
 
 
 

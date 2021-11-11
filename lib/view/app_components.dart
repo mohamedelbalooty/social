@@ -437,7 +437,7 @@ class BuildDefaultCircleIconButton extends StatelessWidget {
   const BuildDefaultCircleIconButton(
       {@required this.onClick,
       @required this.icon,
-      this.radius = 30.0,
+      this.radius = 25.0,
       this.iconSize = 18.0});
 
   @override
@@ -445,11 +445,13 @@ class BuildDefaultCircleIconButton extends StatelessWidget {
     return IconButton(
       splashColor: mainColor.withOpacity(0.3),
       highlightColor: mainColor.withOpacity(0.3),
+      constraints: const BoxConstraints(),
       icon: Container(
         height: radius,
         width: radius,
         decoration: BoxDecoration(
-          color: lightMainColor,
+          // color: lightMainColor,
+          color: mainColor,
           shape: BoxShape.circle,
           border: Border.all(color: mainColor, width: 1.0),
         ),
@@ -457,7 +459,7 @@ class BuildDefaultCircleIconButton extends StatelessWidget {
           child: Icon(
             icon,
             size: 18.0,
-            color: mainColor,
+            color: whiteColor,
           ),
         ),
       ),
@@ -770,7 +772,8 @@ class _BuildWriteContentWidgetState extends State<BuildWriteContentWidget> {
                           child: Center(
                             child: Icon(
                               IconBroken.Send,
-                              size: 22.0,
+                              size: _textFieldContent == '' &&
+                                  widget.contentImage == null ? 20.0 : 22.0,
                               color: _textFieldContent == '' &&
                                       widget.contentImage == null
                                   ? Colors.grey

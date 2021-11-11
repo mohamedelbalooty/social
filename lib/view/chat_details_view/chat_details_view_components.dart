@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import '../../icon_broken.dart';
 import '../app_components.dart';
 
-AppBar buildChatDetailsViewAppBar(
-  BuildContext context, {
-  @required String uImage,
-  @required String uName,
-}) {
+AppBar buildChatDetailsViewAppBar(BuildContext context,
+    {@required String uImage,
+    @required String uName,
+    @required Function onPop}) {
   return AppBar(
     elevation: 2.0,
     titleSpacing: 0.0,
@@ -24,8 +23,9 @@ AppBar buildChatDetailsViewAppBar(
       ],
     ),
     leading: BuildDefaultIconButton(
-      icon: const Icon(IconBroken.Arrow___Left_2),
+      icon: const Icon(IconBroken.Arrow___Left),
       onClick: () {
+        onPop();
         Navigator.pop(context);
       },
     ),

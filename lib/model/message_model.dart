@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 
 class MessageModel {
   final String senderId, receiverId, messageText, messageImage, messageDateTime;
-  // final DateTime messageDateTime;
   final Timestamp messageTime;
 
   MessageModel(

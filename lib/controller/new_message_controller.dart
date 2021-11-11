@@ -10,7 +10,6 @@ import 'package:social_app/states/new_message_controller_states.dart';
 
 class NewMessageController extends ChangeNotifier {
   NewMessageControllerSendMessageStates newMessageControllerSendMessageStates;
-  NewMessageControllerGetMessagesStates newMessageControllerGetMessagesStates;
   NewMessageControllerPickMessageImageStates
       newMessageControllerPickMessageImageStates;
 
@@ -39,12 +38,20 @@ class NewMessageController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removePickedImage() {
+    _messageImage = null;
+    notifyListeners();
+  }
+
   Future<void> uploadMessageImage(
       {@required String senderId,
       @required String receiverId,
       @required String messageText,
       @required String messageDateTime,
       @required Timestamp messageTime}) async {
+    newMessageControllerSendMessageStates =
+        NewMessageControllerSendMessageStates.SendImageMessageLoadingState;
+    notifyListeners();
     try {
       final reference = FirebaseHelper.storageHelper
           .ref()

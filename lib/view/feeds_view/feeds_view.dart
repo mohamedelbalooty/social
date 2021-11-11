@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:social_app/constants/colors_constants.dart';
+import 'package:social_app/controller/comments_controller.dart';
 import 'package:social_app/controller/posts_controller.dart';
 import 'package:social_app/controller/user_profile_controller.dart';
 import 'package:social_app/model/user_model.dart';
@@ -149,8 +150,8 @@ class FeedsView extends StatelessWidget {
                     return BuildPostItem(
                       image: _userProfileData.profileImageUrl,
                       post: provider.posts[index],
-                      likes: provider.likes[index],
-                      stream:
+                      // commentsNumber: context.select<CommentsController, int>((value) => value.comments.length),
+                      likeStream:
                           provider.getLikes(postDocId: provider.postsId[index]),
                       onLikePost: () async {
                         await provider.likePost(
@@ -163,7 +164,8 @@ class FeedsView extends StatelessWidget {
                       commentOnPost: () {
                         namedNavigateTo(context, CommentsView.id, arguments:
                         {
-                          'likesNumber': provider.likes[index],
+                          // 'likesNumber': provider.likes[index],
+                          'likesNumber': 5,
                           'postId': provider.postsId[index],
                         });
                         // await showModalBottomSheet(

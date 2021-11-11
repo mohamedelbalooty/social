@@ -1,14 +1,10 @@
-enum NewMessageControllerSendMessageStates{
+enum NewMessageControllerSendMessageStates {
   SendMessageSuccessState,
-  SendMessageErrorState
+  SendMessageErrorState,
+  SendImageMessageLoadingState,
 }
 
-enum NewMessageControllerGetMessagesStates{
-  GetMessagesSuccessState,
-  GetMessagesErrorState
-}
-
-enum NewMessageControllerPickMessageImageStates{
+enum NewMessageControllerPickMessageImageStates {
   MessageImagePickedSuccessState,
   MessageImagePickedErrorState
 }

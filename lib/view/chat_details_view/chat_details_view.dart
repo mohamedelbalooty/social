@@ -26,69 +26,84 @@ class ChatDetailsView extends StatelessWidget {
     UserModel senderData = context.select<UserProfileController, UserModel>(
         (value) => value.userProfileData);
     return Scaffold(
-      appBar: buildChatDetailsViewAppBar(
-        context,
-        uImage: receiverUser.profileImageUrl,
-        uName: receiverUser.name,
-      ),
+      appBar: buildChatDetailsViewAppBar(context,
+          uImage: receiverUser.profileImageUrl,
+          uName: receiverUser.name, onPop: () {
+        Provider.of<NewMessageController>(context, listen: false)
+            .removePickedImage();
+      }),
       body: Builder(
         builder: (context) {
           Provider.of<MessagesController>(context, listen: false).getMessages(
               senderId: senderData.uid, receiverId: receiverUser.uid);
-          return Consumer<MessagesController>(
-            builder: (context, provider, child) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Column(
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Consumer<NewMessageController>(
+              builder: (context, newMessageControllerProvider, child) {
+                return Stack(
+                  alignment: Alignment.bottomCenter,
                   children: [
-                    ConditionalBuilder(
-                      condition: provider.messages.length > 0,
-                      builder: (_) => Expanded(
-                        child: ListView.separated(
-                          physics: const BouncingScrollPhysics(),
-                          reverse: true,
-                          itemCount: provider.messages.length,
-                          itemBuilder: (_, index) {
-                            if (senderData.uid ==
-                                provider.messages[index].senderId)
-                              return _senderMessageBubble(context,
-                                  message: provider.messages[index],
-                                  senderUser: senderData);
-                            return _receiverMessageBubble(
-                                message: provider.messages[index],
-                                receiverUser: receiverUser);
+                    Column(
+                      children: [
+                        Consumer<MessagesController>(
+                          builder:
+                              (context, messagesControllerProvider, child) {
+                            return ConditionalBuilder(
+                              condition:
+                                  messagesControllerProvider.messages.length >
+                                      0,
+                              builder: (_) => Expanded(
+                                child: ListView.separated(
+                                  physics: const BouncingScrollPhysics(),
+                                  reverse: true,
+                                  itemCount: messagesControllerProvider
+                                      .messages.length,
+                                  itemBuilder: (_, index) {
+                                    if (senderData.uid ==
+                                        messagesControllerProvider
+                                            .messages[index].senderId)
+                                      return _senderMessageBubble(context,
+                                          message: messagesControllerProvider
+                                              .messages[index],
+                                          senderUser: senderData);
+                                    return _receiverMessageBubble(
+                                        message: messagesControllerProvider
+                                            .messages[index],
+                                        receiverUser: receiverUser);
+                                  },
+                                  separatorBuilder: (_, index) =>
+                                      mediumVerticalDistance(),
+                                ),
+                              ),
+                              fallback: (_) => Expanded(
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.2,
+                                      ),
+                                      BuildEmptyListWidget(
+                                        title: 'No messages available yet.',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
                           },
-                          separatorBuilder: (_, index) =>
-                              mediumVerticalDistance(),
                         ),
-                      ),
-                      fallback: (_) => Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.2,
-                              ),
-                              BuildEmptyListWidget(
-                                title: 'No messages available yet.',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    minimumVerticalDistance(),
-                    Consumer<NewMessageController>(
-                      builder: (context, provider, child) {
-                        return Expanded(
+                        minimumVerticalDistance(),
+                        Expanded(
                           flex: 0,
                           child: BuildWriteContentWidget(
-                            contentImage: provider.messageImage,
                             contentController: _chatController,
+                            contentImage: newMessageControllerProvider.messageImage,
                             pickContentImage: () async {
-                              await provider.pickMessageImage();
-                              if (provider
+                              await newMessageControllerProvider
+                                  .pickMessageImage();
+                              if (newMessageControllerProvider
                                       .newMessageControllerPickMessageImageStates ==
                                   NewMessageControllerPickMessageImageStates
                                       .MessageImagePickedErrorState) {
@@ -96,14 +111,17 @@ class ChatDetailsView extends StatelessWidget {
                                   buildDefaultSnackBar(
                                     context,
                                     key: UniqueKey(),
-                                    contentText: provider.errorMessage,
+                                    contentText: newMessageControllerProvider
+                                        .errorMessage,
                                   ),
                                 );
                               }
                             },
                             sendContent: () async {
-                              if (provider.messageImage != null) {
-                                await provider.uploadMessageImage(
+                              if (newMessageControllerProvider.messageImage !=
+                                  null) {
+                                await newMessageControllerProvider
+                                    .uploadMessageImage(
                                   senderId: senderData.uid,
                                   receiverId: receiverUser.uid,
                                   messageText: _chatController.text,
@@ -111,7 +129,7 @@ class ChatDetailsView extends StatelessWidget {
                                   messageTime: Timestamp.now(),
                                 );
                               } else {
-                                await provider.sendMessage(
+                                await newMessageControllerProvider.sendMessage(
                                   senderId: senderData.uid,
                                   receiverId: receiverUser.uid,
                                   messageText: _chatController.text,
@@ -120,7 +138,7 @@ class ChatDetailsView extends StatelessWidget {
                                   messageTime: Timestamp.now(),
                                 );
                               }
-                              if (provider
+                              if (newMessageControllerProvider
                                       .newMessageControllerSendMessageStates ==
                                   NewMessageControllerSendMessageStates
                                       .SendMessageErrorState) {
@@ -128,20 +146,70 @@ class ChatDetailsView extends StatelessWidget {
                                   buildDefaultSnackBar(
                                     context,
                                     key: UniqueKey(),
-                                    contentText: provider.errorMessage,
+                                    contentText: newMessageControllerProvider
+                                        .errorMessage,
                                   ),
                                 );
                               }
                               _chatController.clear();
                             },
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
+                    if (newMessageControllerProvider.messageImage != null)
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Stack(
+                              alignment: AlignmentDirectional.topEnd,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(8.0),
+                                  ),
+                                  child: Image.file(
+                                    newMessageControllerProvider.messageImage,
+                                    height: 120.0,
+                                    width: 130.0,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                BuildDefaultCircleIconButton(
+                                  icon: Icons.close,
+                                  onClick: () {
+                                    newMessageControllerProvider
+                                        .removePickedImage();
+                                  },
+                                ),
+                              ],
+                            ),
+                            if (newMessageControllerProvider
+                                    .newMessageControllerSendMessageStates ==
+                                NewMessageControllerSendMessageStates
+                                    .SendImageMessageLoadingState)
+                              const SizedBox(
+                                height: 2,
+                              ),
+                            if (newMessageControllerProvider
+                                    .newMessageControllerSendMessageStates ==
+                                NewMessageControllerSendMessageStates
+                                    .SendImageMessageLoadingState)
+                              buildLinearLoadingWidget(),
+                            const SizedBox(
+                              height: 51.0,
+                            ),
+                            // minimumVerticalDistance(),
+                          ],
+                        ),
+                      ),
                   ],
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

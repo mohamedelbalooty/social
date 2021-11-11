@@ -9,7 +9,8 @@ import 'package:social_app/view/new_post_view/new_post_view.dart';
 import 'package:social_app/view/signup_view/signup_view.dart';
 import 'constants/cache_constants.dart';
 import 'controller/chat_controller.dart';
-import 'controller/comment_controller.dart';
+import 'controller/comments_controller.dart';
+import 'controller/new_comment_controller.dart';
 import 'controller/login_controller.dart';
 import 'controller/messages_controller.dart';
 import 'controller/new_message_controller.dart';
@@ -58,8 +59,11 @@ class SocialApp extends StatelessWidget {
         ChangeNotifierProvider<UserProfileController>(
           create: (_) => UserProfileController(),
         ),
-        ChangeNotifierProvider<CommentController>(
-          create: (_) => CommentController(),
+        ChangeNotifierProvider<NewCommentController>(
+          create: (_) => NewCommentController(),
+        ),
+        ChangeNotifierProvider<CommentsController>(
+          create: (_) => CommentsController(),
         ),
         ChangeNotifierProvider<ChatsController>(
           create: (_) => ChatsController(),
@@ -70,17 +74,15 @@ class SocialApp extends StatelessWidget {
         ChangeNotifierProvider<NewMessageController>(
           create: (_) => NewMessageController(),
         ),
-        ChangeNotifierProvider<MessageTextFieldProvider>(
-          create: (_) => MessageTextFieldProvider(),
-        ),
-        // ChangeNotifierProvider<NewMessageController>(
-        //   create: (_) => NewMessageController(),
+        // ChangeNotifierProvider<NewCommentController>(
+        //   create: (_) => NewCommentController(),
         // ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primaryColor: mainColor,
+          accentColor: Colors.pink,
           fontFamily: 'Jannah',
           scaffoldBackgroundColor: lightMainColor,
           textTheme: TextTheme(
