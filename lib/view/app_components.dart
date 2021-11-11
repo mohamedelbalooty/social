@@ -647,57 +647,36 @@ Divider buildDefaultDivider({double height = 1.0}) {
 
 class BuildWriteContentTextField extends StatelessWidget {
   final TextEditingController controller;
-  final Key key;
-  final Widget icon;
   final Function onChange;
 
   const BuildWriteContentTextField(
-      {@required this.key,
-      @required this.controller,
-      @required this.icon,
-      @required this.onChange});
+      {@required this.controller, @required this.onChange});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 40.0,
-      child: TextFormField(
-        key: key,
-        controller: controller,
-        onChanged: onChange,
-        keyboardType: TextInputType.text,
-        autocorrect: true,
-        textCapitalization: TextCapitalization.words,
-        cursorColor: mainColor,
-        style: const TextStyle(
+    return TextField(
+      controller: controller,
+      onChanged: onChange,
+      keyboardType: TextInputType.text,
+      autofocus: true,
+      autocorrect: true,
+      cursorColor: mainColor,
+      style: const TextStyle(
+        fontSize: 12.0,
+        color: darkMainColor,
+      ),
+      decoration: const InputDecoration(
+        contentPadding: const EdgeInsetsDirectional.only(start: 10.0),
+        isDense: true,
+        hintText: 'Write a comment...',
+        hintStyle: TextStyle(
+          color: mainColor,
           fontSize: 12.0,
-          color: darkMainColor,
+          height: 1.2,
         ),
-        autofocus: true,
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsetsDirectional.only(start: 10.0),
-          filled: true,
-          fillColor: mainColor.withOpacity(0.4),
-          hintText: 'Write a comment...',
-          hintStyle: const TextStyle(
-            color: mainColor,
-            fontSize: 12.0,
-            height: 1.2,
-          ),
-          suffixIcon: icon,
-          enabledBorder: buildOutlineBorder(),
-          focusedBorder: buildOutlineBorder(),
-        ),
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
       ),
-    );
-  }
-
-  OutlineInputBorder buildOutlineBorder() {
-    return const OutlineInputBorder(
-      borderRadius: BorderRadius.all(
-        Radius.circular(8.0),
-      ),
-      borderSide: BorderSide(color: Colors.transparent),
     );
   }
 }
@@ -705,11 +684,13 @@ class BuildWriteContentTextField extends StatelessWidget {
 class BuildWriteContentWidget extends StatefulWidget {
   final TextEditingController contentController;
   final Function sendContent, pickContentImage;
+  final File contentImage;
 
   const BuildWriteContentWidget(
       {@required this.contentController,
       @required this.sendContent,
-      @required this.pickContentImage});
+      @required this.pickContentImage,
+      @required this.contentImage});
 
   @override
   _BuildWriteContentWidgetState createState() =>
@@ -722,7 +703,6 @@ class _BuildWriteContentWidgetState extends State<BuildWriteContentWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         buildDefaultDivider(height: 0.0),
         Padding(
@@ -733,8 +713,8 @@ class _BuildWriteContentWidgetState extends State<BuildWriteContentWidget> {
                 child: Container(
                   height: 40.0,
                   width: 40.0,
-                  decoration: BoxDecoration(
-                    color: mainColor.withOpacity(0.4),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFA7B6),
                     borderRadius: const BorderRadius.all(
                       Radius.circular(8.0),
                     ),
@@ -751,24 +731,55 @@ class _BuildWriteContentWidgetState extends State<BuildWriteContentWidget> {
               ),
               mediumHorizontalDistance(),
               Expanded(
-                child: BuildWriteContentTextField(
-                  key: UniqueKey(),
-                  controller: widget.contentController,
-                  onChange: (String value) {
-                    setState(() {
-                      // widget.contentController.text = value;
-                      _textFieldContent = value;
-                    });
-                  },
-                  icon: InkWell(
-                    onTap: _textFieldContent == '' ? () {} : widget.sendContent,
-                    child: Icon(
-                      IconBroken.Send,
-                      size: 22.0,
-                      color: _textFieldContent == ''
-                          ? Colors.grey.shade600
-                          : mainColor,
+                child: Container(
+                  height: 40.0,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFA7B6),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(8.0),
                     ),
+                  ),
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: BuildWriteContentTextField(
+                          controller: widget.contentController,
+                          onChange: (String value) {
+                            setState(() {
+                              _textFieldContent = value;
+                            });
+                          },
+                        ),
+                      ),
+                      InkWell(
+                        onTap: _textFieldContent == '' &&
+                                widget.contentImage == null
+                            ? () {}
+                            : () {
+                                widget.sendContent();
+                                setState(() {
+                                  _textFieldContent = '';
+                                });
+                              },
+                        child: Container(
+                          height: 40.0,
+                          width: 40.0,
+                          color: mainColor,
+                          child: Center(
+                            child: Icon(
+                              IconBroken.Send,
+                              size: 22.0,
+                              color: _textFieldContent == '' &&
+                                      widget.contentImage == null
+                                  ? Colors.grey
+                                  : whiteColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -804,7 +815,6 @@ class BuildErrorResultWidget extends StatelessWidget {
               errorMessage,
               style: Theme.of(context).textTheme.bodyText1,
             ),
-            // minimumVerticalDistance(),
           ],
         ),
       ),
@@ -833,8 +843,7 @@ class BuildEmptyListWidget extends StatelessWidget {
             ),
             Text(
               'Opps !'.toUpperCase(),
-              style: const TextStyle(
-                  color: mainColor, fontSize: 28.0),
+              style: const TextStyle(color: mainColor, fontSize: 28.0),
             ),
             Text(
               title,

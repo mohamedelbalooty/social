@@ -4,6 +4,7 @@ import 'package:social_app/helper/firebase_helper.dart';
 import 'package:social_app/model/message_model.dart';
 
 class MessagesController extends ChangeNotifier {
+
   List<MessageModel> get messages => _messages;
   List<MessageModel> _messages = [];
 

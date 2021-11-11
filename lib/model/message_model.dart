@@ -2,15 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
 class MessageModel {
-  final String senderId, receiverId, messageText, messageImage, messageTime;
-
-  // final Timestamp messageTime;
+  final String senderId, receiverId, messageText, messageImage, messageDateTime;
+  // final DateTime messageDateTime;
+  final Timestamp messageTime;
 
   MessageModel(
       {@required this.senderId,
       @required this.receiverId,
       @required this.messageText,
       @required this.messageImage,
+      @required this.messageDateTime,
       @required this.messageTime});
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
@@ -19,6 +20,7 @@ class MessageModel {
       receiverId: json['receiverId'],
       messageText: json['messageText'],
       messageImage: json['messageImage'],
+      messageDateTime: json['messageDateTime'],
       messageTime: json['messageTime'],
     );
   }
@@ -29,6 +31,7 @@ class MessageModel {
       'receiverId': this.receiverId,
       'messageText': this.messageText,
       'messageImage': this.messageImage,
+      'messageDateTime': this.messageDateTime,
       'messageTime': this.messageTime
     };
   }

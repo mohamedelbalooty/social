@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:social_app/constants/firestore_constants.dart';
@@ -22,7 +23,7 @@ class NewMessageController extends ChangeNotifier {
   Future<void> pickMessageImage() async {
     var _pickedFile = await ImagePickerHelper.picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 90,
+      imageQuality: 80,
     );
     if (_pickedFile != null) {
       _messageImage = File(_pickedFile.path);
@@ -42,7 +43,8 @@ class NewMessageController extends ChangeNotifier {
       {@required String senderId,
       @required String receiverId,
       @required String messageText,
-      @required String messageTime}) async {
+      @required String messageDateTime,
+      @required Timestamp messageTime}) async {
     try {
       final reference = FirebaseHelper.storageHelper
           .ref()
@@ -54,6 +56,7 @@ class NewMessageController extends ChangeNotifier {
             receiverId: receiverId,
             messageText: messageText,
             messageImage: value,
+            messageDateTime: messageDateTime,
             messageTime: messageTime);
         newMessageControllerSendMessageStates =
             NewMessageControllerSendMessageStates.SendMessageSuccessState;
@@ -79,12 +82,14 @@ class NewMessageController extends ChangeNotifier {
       @required String receiverId,
       @required String messageText,
       @required String messageImage,
-      @required String messageTime}) async {
+      @required String messageDateTime,
+      @required Timestamp messageTime}) async {
     MessageModel message = MessageModel(
         senderId: senderId,
         receiverId: receiverId,
         messageText: messageText,
         messageImage: messageImage,
+        messageDateTime: messageDateTime,
         messageTime: messageTime);
     try {
       await FirebaseHelper.firestoreHelper

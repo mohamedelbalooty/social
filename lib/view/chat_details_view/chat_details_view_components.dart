@@ -34,17 +34,22 @@ AppBar buildChatDetailsViewAppBar(
 
 class BuildMessageBubble extends StatelessWidget {
   final Color color;
-  final String messageText, messageImage;
+  final String messageText, messageImage, userImage;
   final Radius bubbleRadiusSender, bubbleRadiusReceiver;
   final AlignmentGeometry bubbleDirection;
-  final CrossAxisAlignment bubbleAxisDirection;
+  final MainAxisAlignment bubbleRowMainAxisDirection;
+  final CrossAxisAlignment bubbleColumnCrossAxisDirection;
+  final bool isSender;
 
   const BuildMessageBubble({
     @required this.color,
     @required this.bubbleRadiusSender,
     @required this.bubbleRadiusReceiver,
     @required this.bubbleDirection,
-    @required this.bubbleAxisDirection,
+    @required this.bubbleRowMainAxisDirection,
+    @required this.bubbleColumnCrossAxisDirection,
+    @required this.userImage,
+    @required this.isSender,
     this.messageText,
     this.messageImage,
   });
@@ -53,52 +58,68 @@ class BuildMessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: bubbleDirection,
-      child: Column(
-        crossAxisAlignment: bubbleAxisDirection,
+      child: Row(
+        mainAxisAlignment: bubbleRowMainAxisDirection,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: (MediaQuery.of(context).size.width / 2) - 40.0,
-            ),
-            padding:
-                const EdgeInsets.all(10.0),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadiusDirectional.only(
-                  topStart: Radius.circular(8.0),
-                  topEnd: Radius.circular(8.0),
-                  bottomEnd: bubbleRadiusSender,
-                  bottomStart: bubbleRadiusReceiver),
-            ),
-            child: Text(
-              messageText,
-              style: Theme.of(context).textTheme.subtitle1.copyWith(
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.normal,
+          if (!isSender)
+            BuildUserCircleImage(
+                image: NetworkImage(userImage), imageRadius: 10.0),
+          if (!isSender) minimumHorizontalDistance(),
+          Column(
+            crossAxisAlignment: bubbleColumnCrossAxisDirection,
+            children: [
+              if (messageText != '')
+                Container(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width / 2,
                   ),
-            ),
-          ),
-          if (messageImage != '')
-          minimumVerticalDistance(),
-          if (messageImage != '')
-            Container(
-              height: 80.0,
-              width: (MediaQuery.of(context).size.width / 2) - 40.0,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadiusDirectional.only(
-                    topStart: Radius.circular(8.0),
-                    topEnd: Radius.circular(8.0),
-                    bottomEnd: bubbleRadiusSender,
-                    bottomStart: bubbleRadiusReceiver),
-                image: DecorationImage(
-                  image: NetworkImage(
-                    messageImage,
+                  padding: const EdgeInsets.all(10.0),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadiusDirectional.only(
+                        topStart: Radius.circular(8.0),
+                        topEnd: Radius.circular(8.0),
+                        bottomEnd: bubbleRadiusSender,
+                        bottomStart: bubbleRadiusReceiver),
+                    // boxShadow: [
+                    //   BoxShadow(
+                    //     color: Colors.black12,
+                    //     offset: Offset(0, 2),
+                    //     blurRadius: 5.0,
+                    //     spreadRadius: 1.0
+                    //   ),
+                    // ],
                   ),
-                  fit: BoxFit.cover,
+                  child: Text(
+                    messageText,
+                    style: Theme.of(context).textTheme.subtitle1.copyWith(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.normal,
+                        ),
+                  ),
                 ),
-              ),
-            ),
+              if (messageImage != '' && messageText != '')
+                minimumVerticalDistance(),
+              if (messageImage != '')
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8.0),
+                      topRight: Radius.circular(8.0),
+                      bottomRight: bubbleRadiusSender,
+                      bottomLeft: bubbleRadiusReceiver),
+                  child: BuildCachedNetworkImage(
+                    url: messageImage,
+                    height: 110.0,
+                    width: MediaQuery.of(context).size.width / 2,
+                  ),
+                ),
+            ],
+          ),
+          if (isSender) minimumHorizontalDistance(),
+          if (isSender)
+            BuildUserCircleImage(
+                image: NetworkImage(userImage), imageRadius: 10.0),
         ],
       ),
     );

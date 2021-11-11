@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:social_app/constants/colors_constants.dart';
 import 'package:social_app/provider/bottom_nav_bar_provider.dart';
+import 'package:social_app/test.dart';
 import 'package:social_app/view/layout_view/layout_view.dart';
 import 'package:social_app/view/new_post_view/new_post_view.dart';
 import 'package:social_app/view/signup_view/signup_view.dart';
@@ -18,6 +19,7 @@ import 'controller/edit_profile_controller.dart';
 import 'controller/signup_controller.dart';
 import 'controller/user_profile_controller.dart';
 import 'helper/cache_helper.dart';
+import 'provider/message_text_field_provider.dart';
 import 'view/chat_details_view/chat_details_view.dart';
 import 'view/comments_view/comments_view.dart';
 import 'view/edit_profile_view/edit_profile_view.dart';
@@ -68,9 +70,9 @@ class SocialApp extends StatelessWidget {
         ChangeNotifierProvider<NewMessageController>(
           create: (_) => NewMessageController(),
         ),
-        // ChangeNotifierProvider<NewMessageController>(
-        //   create: (_) => NewMessageController(),
-        // ),
+        ChangeNotifierProvider<MessageTextFieldProvider>(
+          create: (_) => MessageTextFieldProvider(),
+        ),
         // ChangeNotifierProvider<NewMessageController>(
         //   create: (_) => NewMessageController(),
         // ),
