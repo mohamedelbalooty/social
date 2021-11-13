@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:social_app/constants/colors_constants.dart';
 import 'package:social_app/constants/firestore_constants.dart';
-import 'package:social_app/controller/comments_controller.dart';
+import 'package:social_app/helper/firebase_helper.dart';
+import 'package:social_app/helper/user_id_helper.dart';
 import 'package:social_app/model/post_model.dart';
 import '../../icon_broken.dart';
 import '../app_components.dart';
@@ -33,25 +36,25 @@ class BuildReactButton extends StatelessWidget {
 }
 
 class BuildPostItem extends StatelessWidget {
+  final String postDocId;
   final String image;
   final PostModel post;
-  final Function onLikePost, commentOnPost;
-
-  // final int likes, commentsNumber;
+  final Function addLike, deleteLike, commentOnPost;
   final Stream likeStream, commentStream;
 
   const BuildPostItem(
-      {@required this.post,
+      {@required this.postDocId,
+      @required this.post,
       @required this.image,
-      @required this.onLikePost,
-      // @required this.likes,
-      //   this.commentsNumber = 5,
+      @required this.addLike,
+      @required this.deleteLike,
       @required this.commentOnPost,
       @required this.likeStream,
       @required this.commentStream});
 
   @override
   Widget build(BuildContext context) {
+    print('BuildPostItem');
     return Card(
       elevation: 5.0,
       margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -84,10 +87,8 @@ class BuildPostItem extends StatelessWidget {
                                 .bodyText2
                                 .copyWith(height: 1.4),
                           ),
-                          const SizedBox(
-                            width: 4.0,
-                          ),
-                          Icon(
+                          minimumHorizontalDistance(),
+                          const Icon(
                             Icons.check_circle,
                             color: Colors.blueAccent,
                             size: 15.0,
@@ -137,14 +138,22 @@ class BuildPostItem extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(IconBroken.Heart, color: Colors.red, size: 18.0,),
+                    const Icon(
+                      IconBroken.Heart,
+                      color: Colors.red,
+                      size: 18.0,
+                    ),
                     minimumHorizontalDistance(),
                     StreamBuilder(
                       stream: likeStream,
                       builder: (context, snapshot) {
+                        print('likeStream');
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return buildCircularLoadingWidget();
+                          return Text(
+                            'Loading...',
+                            style: Theme.of(context).textTheme.caption,
+                          );
                         } else {
                           if (snapshot.hasData) {
                             return Text(
@@ -173,9 +182,13 @@ class BuildPostItem extends StatelessWidget {
                     StreamBuilder(
                       stream: commentStream,
                       builder: (context, snapshot) {
+                        print('commentStream');
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return buildCircularLoadingWidget();
+                          return Text(
+                            'Loading...',
+                            style: Theme.of(context).textTheme.caption,
+                          );
                         } else {
                           if (snapshot.hasData) {
                             return Text(
@@ -191,10 +204,6 @@ class BuildPostItem extends StatelessWidget {
                         }
                       },
                     ),
-                    // Text(
-                    //   '$commentsNumber comment',
-                    //   style: Theme.of(context).textTheme.caption,
-                    // ),
                   ],
                 ),
               ],
@@ -216,11 +225,41 @@ class BuildPostItem extends StatelessWidget {
                   ),
                   onTap: commentOnPost,
                 ),
-                const Expanded(child: SizedBox()),
-                BuildReactButton(
-                  icon: IconBroken.Heart,
-                  iconColor: Colors.red,
-                  onClick: onLikePost,
+                const Spacer(),
+                StreamBuilder<DocumentSnapshot>(
+                  stream: FirebaseHelper.firestoreHelper
+                      .collection(postsCollection)
+                      .doc(postDocId)
+                      .collection(likesCollection)
+                      .doc(UserIdHelper.currentUid)
+                      .snapshots(),
+                  builder: (context, docSnapshot) {
+                    if (!docSnapshot.hasData) {
+                      return Icon(
+                        IconBroken.Heart,
+                        color: greyColor,
+                        size: 18.0,
+                      );
+                    }
+                    if (docSnapshot.data.exists) {
+                      return BuildReactButton(
+                        icon: Icons.favorite,
+                        iconColor: Colors.red,
+                        iconSize: 20.0,
+                        onClick: () async {
+                          await addLikes(true, postDocId);
+                        },
+                      );
+                    } else {
+                      return BuildReactButton(
+                        icon: Icons.favorite_border,
+                        iconColor: greyColor,
+                        onClick: () async{
+                           await addLikes(false, postDocId);
+                        },
+                      );
+                    }
+                  },
                 ),
                 minimumHorizontalDistance(),
                 Text(
@@ -236,96 +275,41 @@ class BuildPostItem extends StatelessWidget {
   }
 }
 
-// class BuildListOfComments extends StatelessWidget {
-//   final String uName, uImage, commentText, date;
-//
-//   const BuildListOfComments({
-//     @required this.uName,
-//     @required this.uImage,
-//     @required this.commentText,
-//     @required this.date,
+// Future<void> like(postDocId) async{
+//   await FirebaseHelper.firestoreHelper
+//       .collection(postsCollection)
+//       .doc(postDocId)
+//       .collection(likesCollection)
+//       .doc(UserIdHelper.currentUid)
+//       .set({
+//     'liked': true,
 //   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Expanded(
-//       child: Padding(
-//         padding: const EdgeInsets.only(top: 5.0),
-//         child: ListView.separated(
-//           itemCount: 10,
-//           itemBuilder: (_, index) {
-//             return Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 10.0),
-//               child: Row(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   BuildUserCircleImage(
-//                     image: NetworkImage(uImage),
-//                     imageRadius: 20.0,
-//                   ),
-//                   mediumHorizontalDistance(),
-//                   Column(
-//                     mainAxisAlignment: MainAxisAlignment.start,
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Container(
-//                         width: (MediaQuery.of(context).size.width) - 70.0,
-//                         decoration: BoxDecoration(
-//                           color: mainColor.withOpacity(0.4),
-//                           borderRadius: const BorderRadius.all(
-//                             Radius.circular(8.0),
-//                           ),
-//                         ),
-//                         child: Padding(
-//                           padding: const EdgeInsets.symmetric(
-//                               horizontal: 10.0, vertical: 5.0),
-//                           child: Column(
-//                             mainAxisAlignment: MainAxisAlignment.start,
-//                             crossAxisAlignment: CrossAxisAlignment.start,
-//                             children: [
-//                               Text(
-//                                 '$uName',
-//                                 style: Theme.of(context)
-//                                     .textTheme
-//                                     .subtitle1
-//                                     .copyWith(height: 1.4),
-//                               ),
-//                               mediumVerticalDistance(),
-//                               Text(
-//                                 '$commentText',
-//                                 style: Theme.of(context)
-//                                     .textTheme
-//                                     .subtitle1
-//                                     .copyWith(fontSize: 11.0, height: 1.4),
-//                               ),
-//                             ],
-//                           ),
-//                         ),
-//                       ),
-//                       ClipRRect(
-//                         borderRadius: const BorderRadius.all(
-//                           Radius.circular(8.0),
-//                         ),
-//                         child: BuildCachedNetworkImage(
-//                           height: 100.0,
-//                           width: (MediaQuery.of(context).size.width) - 70.0,
-//                           url: testTwo,
-//                         ),
-//                       ),
-//                       Text(
-//                         '$date',
-//                         style: Theme.of(context).textTheme.caption.copyWith(
-//                             fontSize: 11.0, fontWeight: FontWeight.normal),
-//                       ),
-//                     ],
-//                   ),
-//                 ],
-//               ),
-//             );
-//           },
-//           separatorBuilder: (_, index) => const SizedBox(height: 2.0),
-//         ),
-//       ),
-//     );
-//   }
 // }
+//
+//  unLike(postDocId)  {
+//    FirebaseHelper.firestoreHelper
+//       .collection(postsCollection)
+//       .doc(postDocId)
+//       .collection(likesCollection)
+//       .doc(UserIdHelper.currentUid).delete();
+// }
+
+
+Future<void> addLikes(bool liked, postDocId) async {
+  liked = !liked;
+  if (liked) {
+   await FirebaseHelper.firestoreHelper
+        .collection(postsCollection)
+        .doc(postDocId)
+        .collection(likesCollection)
+        .doc(UserIdHelper.currentUid).set({
+      'liked': true,
+    });
+  } else {
+    await FirebaseHelper.firestoreHelper
+        .collection(postsCollection)
+        .doc(postDocId)
+        .collection(likesCollection)
+        .doc(UserIdHelper.currentUid).delete();
+  }
+}

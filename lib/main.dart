@@ -10,6 +10,7 @@ import 'package:social_app/view/signup_view/signup_view.dart';
 import 'constants/cache_constants.dart';
 import 'controller/chat_controller.dart';
 import 'controller/comments_controller.dart';
+import 'controller/comments_number_controller.dart';
 import 'controller/new_comment_controller.dart';
 import 'controller/login_controller.dart';
 import 'controller/messages_controller.dart';
@@ -74,9 +75,9 @@ class SocialApp extends StatelessWidget {
         ChangeNotifierProvider<NewMessageController>(
           create: (_) => NewMessageController(),
         ),
-        // ChangeNotifierProvider<NewCommentController>(
-        //   create: (_) => NewCommentController(),
-        // ),
+        ChangeNotifierProvider<CommentsNumberController>(
+          create: (_) => CommentsNumberController(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -7,6 +7,7 @@ import 'package:social_app/controller/comments_controller.dart';
 import 'package:social_app/controller/user_profile_controller.dart';
 import 'package:social_app/model/user_model.dart';
 import 'package:social_app/controller/new_comment_controller.dart';
+import 'package:social_app/states/comments_controller_stats.dart';
 import 'package:social_app/states/new_comment_controller_states.dart';
 import '../app_components.dart';
 import 'comments_view_components.dart';
@@ -59,105 +60,119 @@ class _CommentsViewState extends State<CommentsView> {
                               likesNumber: receptors['likesNumber'],
                             ),
                             Consumer<CommentsController>(
-                              builder: (context, commentsControllerProvider, child) {
-                                return ConditionalBuilder(
-                                  condition:
-                                  commentsControllerProvider.comments.length > 0,
-                                  builder: (context) => Expanded(
-                                    child: ListView.separated(
-                                      itemCount: commentsControllerProvider
-                                          .comments.length,
-                                      itemBuilder: (_, index) {
-                                        return Padding(
-                                          padding: index == 0
-                                              ? const EdgeInsets.only(
-                                              top: 5.0)
-                                              : EdgeInsets.zero,
-                                          child: BuildCommentItem(
-                                            uName:
-                                            commentsControllerProvider
-                                                .comments[index].uName,
-                                            uImage:
-                                            commentsControllerProvider
-                                                .comments[index].uImage,
-                                            commentText:
-                                            commentsControllerProvider
-                                                .comments[index]
-                                                .commentText,
-                                            date: '12/11/2021',
-                                            commentImage:
-                                            commentsControllerProvider
-                                                .comments[index]
-                                                .commentImage,
-                                          ),
-                                        );
-                                      },
-                                      separatorBuilder: (_, index) =>
-                                       minimumVerticalDistance(),
+                              builder:
+                                  (context, commentsControllerProvider, child) {
+                                if (commentsControllerProvider
+                                        .commentsControllerStates ==
+                                    CommentsControllerStates
+                                        .CommentsControllerGetCommentsErrorState) {
+                                  return Expanded(
+                                    child: BuildErrorResultWidget(
+                                      errorImage: commentsControllerProvider
+                                          .errorResult.errorImage,
+                                      errorMessage: commentsControllerProvider
+                                          .errorResult.errorMessage,
                                     ),
-                                  ),
-                                  fallback: (_) => Expanded(
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          SizedBox(
-                                            height:
-                                            MediaQuery.of(context).size.height *
-                                                0.2,
-                                          ),
-                                          BuildEmptyListWidget(
-                                            title: 'No comments available yet.',
-                                          ),
-                                        ],
+                                  );
+                                } else {
+                                  return ConditionalBuilder(
+                                    condition: commentsControllerProvider
+                                            .comments.length >
+                                        0,
+                                    builder: (context) => Expanded(
+                                      child: ListView.separated(
+                                        itemCount: commentsControllerProvider
+                                            .comments.length,
+                                        itemBuilder: (_, index) {
+                                          return Padding(
+                                            padding: index == 0
+                                                ? const EdgeInsets.only(
+                                                    top: 5.0)
+                                                : EdgeInsets.zero,
+                                            child: BuildCommentItem(
+                                              uName: commentsControllerProvider
+                                                  .comments[index].uName,
+                                              uImage: commentsControllerProvider
+                                                  .comments[index].uImage,
+                                              commentText:
+                                                  commentsControllerProvider
+                                                      .comments[index]
+                                                      .commentText,
+                                              date: '12/11/2021',
+                                              commentImage:
+                                                  commentsControllerProvider
+                                                      .comments[index]
+                                                      .commentImage,
+                                            ),
+                                          );
+                                        },
+                                        separatorBuilder: (_, index) =>
+                                            minimumVerticalDistance(),
                                       ),
                                     ),
-                                  ),
-                                );
+                                    fallback: (_) => Expanded(
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.2,
+                                            ),
+                                            BuildEmptyListWidget(
+                                              title:
+                                                  'No comments available yet.',
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
                             ),
                             Expanded(
                               flex: 0,
                               child: BuildWriteContentWidget(
                                 contentController: _commentController,
-                                contentImage: newCommentControllerProvider
-                                    .commentImage,
+                                contentImage:
+                                    newCommentControllerProvider.commentImage,
                                 pickContentImage: () async {
                                   await newCommentControllerProvider
                                       .pickCommentImage();
                                   if (newCommentControllerProvider
-                                      .newCommentControllerPickCommentImage ==
+                                          .newCommentControllerPickCommentImage ==
                                       NewCommentControllerPickCommentImage
                                           .CommentImagePickedErrorState) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       buildDefaultSnackBar(
                                         context,
                                         key: UniqueKey(),
                                         contentText:
-                                        newCommentControllerProvider
-                                            .errorMessage,
+                                            newCommentControllerProvider
+                                                .errorMessage,
                                       ),
                                     );
                                   }
                                 },
                                 sendContent: () {
                                   if (newCommentControllerProvider
-                                      .commentImage !=
+                                          .commentImage !=
                                       null) {
                                     newCommentControllerProvider
                                         .uploadCommentImage(
-                                        postDocId:
-                                        receptors['postId'],
-                                        uName: _userProfileData.name,
-                                        uImage: _userProfileData
-                                            .profileImageUrl,
-                                        commentText:
-                                        _commentController.text,
-                                        commentDateTime:
-                                        DateTime.now().toString(),
-                                        commentTime: Timestamp.now());
+                                            postDocId: receptors['postId'],
+                                            uName: _userProfileData.name,
+                                            uImage: _userProfileData
+                                                .profileImageUrl,
+                                            commentText:
+                                                _commentController.text,
+                                            commentDateTime:
+                                                DateTime.now().toString(),
+                                            commentTime: Timestamp.now());
                                     if (newCommentControllerProvider
-                                        .newCommentControllerCreateComment ==
+                                            .newCommentControllerCreateComment ==
                                         NewCommentControllerCreateComment
                                             .ErrorState) {
                                       ScaffoldMessenger.of(context)
@@ -166,8 +181,8 @@ class _CommentsViewState extends State<CommentsView> {
                                           context,
                                           key: UniqueKey(),
                                           contentText:
-                                          newCommentControllerProvider
-                                              .errorMessage,
+                                              newCommentControllerProvider
+                                                  .errorMessage,
                                         ),
                                       );
                                     }
@@ -176,16 +191,14 @@ class _CommentsViewState extends State<CommentsView> {
                                         .createCommentOnPost(
                                       postDocId: receptors['postId'],
                                       uName: _userProfileData.name,
-                                      uImage: _userProfileData
-                                          .profileImageUrl,
-                                      commentText:
-                                      _commentController.text,
+                                      uImage: _userProfileData.profileImageUrl,
+                                      commentText: _commentController.text,
                                       commentDateTime:
-                                      DateTime.now().toString(),
+                                          DateTime.now().toString(),
                                       commentTime: Timestamp.now(),
                                     );
                                     if (newCommentControllerProvider
-                                        .newCommentControllerCreateComment ==
+                                            .newCommentControllerCreateComment ==
                                         NewCommentControllerCreateComment
                                             .ErrorState) {
                                       ScaffoldMessenger.of(context)
@@ -194,13 +207,14 @@ class _CommentsViewState extends State<CommentsView> {
                                           context,
                                           key: UniqueKey(),
                                           contentText:
-                                          newCommentControllerProvider
-                                              .errorMessage,
+                                              newCommentControllerProvider
+                                                  .errorMessage,
                                         ),
                                       );
                                     }
                                   }
                                   _commentController.clear();
+
                                   ///UNFOCUS
                                   // FocusScope.of(context).unfocus();
                                 },

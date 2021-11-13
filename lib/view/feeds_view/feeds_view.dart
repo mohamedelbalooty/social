@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:social_app/constants/colors_constants.dart';
+import 'package:social_app/constants/firestore_constants.dart';
 import 'package:social_app/controller/comments_controller.dart';
+import 'package:social_app/controller/comments_number_controller.dart';
 import 'package:social_app/controller/posts_controller.dart';
 import 'package:social_app/controller/user_profile_controller.dart';
+import 'package:social_app/helper/firebase_helper.dart';
+import 'package:social_app/helper/user_id_helper.dart';
 import 'package:social_app/model/user_model.dart';
 import 'package:social_app/states/posts_controller_states.dart';
 import 'package:social_app/states/user_profile_controller_states.dart';
 import 'package:social_app/view/comments_view/comments_view.dart';
+import '../../icon_broken.dart';
 import '../app_components.dart';
 import 'feeds_view_components.dart';
 
@@ -147,27 +152,222 @@ class FeedsView extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: provider.posts.length,
                   itemBuilder: (_, index) {
+
+                    // return Card(
+                    //   elevation: 5.0,
+                    //   margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                    //   clipBehavior: Clip.antiAliasWithSaveLayer,
+                    //   child: Padding(
+                    //     padding: const EdgeInsets.symmetric(
+                    //         horizontal: 10.0, vertical: 5.0),
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Row(
+                    //           children: [
+                    //             BuildUserCircleImage(
+                    //               image: NetworkImage(
+                    //                   provider.posts[index].uImage),
+                    //               imageRadius: 20.0,
+                    //             ),
+                    //             const SizedBox(
+                    //               width: 15.0,
+                    //             ),
+                    //             Expanded(
+                    //               child: Column(
+                    //                 crossAxisAlignment:
+                    //                     CrossAxisAlignment.start,
+                    //                 children: [
+                    //                   Row(
+                    //                     crossAxisAlignment:
+                    //                         CrossAxisAlignment.end,
+                    //                     children: [
+                    //                       Text(
+                    //                         provider.posts[index].uName,
+                    //                         style: Theme.of(context)
+                    //                             .textTheme
+                    //                             .bodyText2
+                    //                             .copyWith(height: 1.4),
+                    //                       ),
+                    //                       const SizedBox(
+                    //                         width: 4.0,
+                    //                       ),
+                    //                       Icon(
+                    //                         Icons.check_circle,
+                    //                         color: Colors.blueAccent,
+                    //                         size: 15.0,
+                    //                       ),
+                    //                     ],
+                    //                   ),
+                    //                   Text(
+                    //                     provider.posts[index].datetime,
+                    //                     style: Theme.of(context)
+                    //                         .textTheme
+                    //                         .caption
+                    //                         .copyWith(
+                    //                           height: 1.4,
+                    //                         ),
+                    //                   ),
+                    //                 ],
+                    //               ),
+                    //             ),
+                    //             SizedBox(),
+                    //             InkWell(
+                    //               child: const Icon(
+                    //                 IconBroken.More_Circle,
+                    //                 size: 22.0,
+                    //                 color: Colors.grey,
+                    //               ),
+                    //               onTap: () {},
+                    //             ),
+                    //           ],
+                    //         ),
+                    //         buildDefaultDivider(height: 20.0),
+                    //         Text(
+                    //           provider.posts[index].postText,
+                    //           style: Theme.of(context).textTheme.subtitle1,
+                    //           textAlign: TextAlign.justify,
+                    //         ),
+                    //         minimumVerticalDistance(),
+                    //         if (provider.posts[index].postImage != '')
+                    //           ClipRRect(
+                    //             borderRadius: const BorderRadius.all(
+                    //               Radius.circular(4.0),
+                    //             ),
+                    //             child: BuildCachedNetworkImage(
+                    //               url: provider.posts[index].postImage,
+                    //               height: 150.0,
+                    //             ),
+                    //           ),
+                    //         if (provider.posts[index].postImage != '')
+                    //           minimumVerticalDistance(),
+                    //         Row(
+                    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //           children: [
+                    //             Row(
+                    //               children: [
+                    //                 const Icon(
+                    //                   IconBroken.Heart,
+                    //                   color: Colors.red,
+                    //                   size: 18.0,
+                    //                 ),
+                    //                 minimumHorizontalDistance(),
+                    //                 Text(
+                    //                   '5',
+                    //                   style:
+                    //                       Theme.of(context).textTheme.caption,
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //             Row(
+                    //               children: [
+                    //                 const Icon(
+                    //                   IconBroken.Chat,
+                    //                   size: 18.0,
+                    //                   color: Colors.amber,
+                    //                 ),
+                    //                 minimumHorizontalDistance(),
+                    //                 Builder(
+                    //                   builder: (context) {
+                    //                     Provider.of<CommentsController>(context, listen: false).getComments(postDocId: provider.postsId[index]);
+                    //                     return Consumer<CommentsController>(
+                    //                       builder: (context, provider, child) {
+                    //                         return Text(
+                    //                           provider.comments.length.toString(),
+                    //                           style: Theme.of(context)
+                    //                               .textTheme
+                    //                               .caption,
+                    //                         );
+                    //                       },
+                    //                     );
+                    //                   },
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //           ],
+                    //         ),
+                    //         buildDefaultDivider(height: 15.0),
+                    //         minimumVerticalDistance(),
+                    //         Row(
+                    //           crossAxisAlignment: CrossAxisAlignment.center,
+                    //           children: [
+                    //             BuildUserCircleImage(
+                    //               image: NetworkImage(
+                    //                   _userProfileData.profileImageUrl ??
+                    //                       errorImage),
+                    //               imageRadius: 15.0,
+                    //             ),
+                    //             minimumHorizontalDistance(),
+                    //             InkWell(
+                    //               child: Text(
+                    //                 'write a comment....',
+                    //                 style: Theme.of(context).textTheme.caption,
+                    //               ),
+                    //               onTap: () {
+                    //                 namedNavigateTo(context, CommentsView.id,
+                    //                     arguments: {
+                    //                       // 'likesNumber': provider.likes[index],
+                    //                       'likesNumber': 5,
+                    //                       'postId': provider.postsId[index],
+                    //                     });
+                    //               },
+                    //             ),
+                    //             const Expanded(child: SizedBox()),
+                    //             BuildReactButton(
+                    //               icon: IconBroken.Heart,
+                    //               iconColor: Colors.red,
+                    //               onClick: () {},
+                    //             ),
+                    //             minimumHorizontalDistance(),
+                    //             Text(
+                    //               'Like',
+                    //               style: Theme.of(context).textTheme.caption,
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // );
+
+                    ///
                     return BuildPostItem(
+                      postDocId: provider.postsId[index],
                       image: _userProfileData.profileImageUrl,
                       post: provider.posts[index],
-                      // commentsNumber: context.select<CommentsController, int>((value) => value.comments.length),
-                      likeStream:
-                          provider.getLikes(postDocId: provider.postsId[index]),
-                      onLikePost: () async {
-                        await provider.likePost(
-                            postDocId: provider.postsId[index]);
-                        if (provider.postsControllerLikePostStates ==
-                            PostsControllerLikePostStates.ErrorState) {
-                          showToast(context, provider.errorMessage);
-                        }
+                      likeStream: FirebaseHelper.firestoreHelper
+                          .collection(postsCollection)
+                          .doc(provider.postsId[index])
+                          .collection(likesCollection)
+                          .snapshots(),
+                      commentStream: FirebaseHelper.firestoreHelper
+                        .collection(postsCollection)
+                        .doc(provider.postsId[index])
+                        .collection(commentsCollection)
+                        .snapshots(),
+                          // provider.getLikes(postDocId: provider.postsId[index]),
+                      // addLike: () async {
+                      //   await provider.likePost(
+                      //       postDocId: provider.postsId[index]);
+                      //   if (provider.postsControllerLikePostStates ==
+                      //       PostsControllerLikePostStates.ErrorState) {
+                      //     showToast(context, provider.errorMessage);
+                      //   }
+                      // },
+                      addLike: (){
+                        addLikes(true, provider.postsId[index]);
+                      },
+                      deleteLike: (){
+                        addLikes(false, provider.postsId[index]);
                       },
                       commentOnPost: () {
-                        namedNavigateTo(context, CommentsView.id, arguments:
-                        {
+                        namedNavigateTo(context, CommentsView.id, arguments: {
                           // 'likesNumber': provider.likes[index],
                           'likesNumber': 5,
                           'postId': provider.postsId[index],
                         });
+
+                        ///
                         // await showModalBottomSheet(
                         //   isScrollControlled: true,
                         //   context: context,
@@ -276,8 +476,10 @@ class FeedsView extends StatelessWidget {
                         //     );
                         //   },
                         // );
+                        ///
                       },
                     );
+                    ///
                   },
                   separatorBuilder: (_, index) {
                     return mediumVerticalDistance();
@@ -295,8 +497,28 @@ class FeedsView extends StatelessWidget {
       },
     );
   }
+  void addLikes(bool liked, postDocId){
+    liked = !liked;
+    if(liked){
+      var ref = FirebaseHelper.firestoreHelper
+          .collection(postsCollection)
+          .doc(postDocId)
+          .collection(likesCollection)
+          .doc(UserIdHelper.currentUid);
+      ref.set({
+        'liked': true,
+      });
+    }else{
+      var ref = FirebaseHelper.firestoreHelper
+          .collection(postsCollection)
+          .doc(postDocId)
+          .collection(likesCollection)
+          .doc(UserIdHelper.currentUid);
+      ref.delete();
+    }
+  }
 }
-//
+
 // class BuildCommentsBottomSheet extends StatefulWidget {
 //   final int likesNumber;
 //   final String uName, uImage, commentText, date;
