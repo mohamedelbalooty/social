@@ -1,13 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/constants/colors_constants.dart';
-import 'package:social_app/view/feeds_view/feeds_view_components.dart';
 import '../../icon_broken.dart';
 import '../app_components.dart';
 
 class BuildLikesNumberWidget extends StatelessWidget {
-  final int likesNumber;
-
-  const BuildLikesNumberWidget({@required this.likesNumber});
+  final Stream<QuerySnapshot> likesStream;
+  final Function onClickedToViewLikes;
+  const BuildLikesNumberWidget({@required this.likesStream, @required this.onClickedToViewLikes});
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +31,36 @@ class BuildLikesNumberWidget extends StatelessWidget {
             size: 20.0,
           ),
           minimumHorizontalDistance(),
-          Text(
-            '$likesNumber',
-            style: Theme.of(context).textTheme.caption,
+          StreamBuilder<QuerySnapshot>(
+            stream: likesStream,
+            builder: (context, snapshot) {
+              print('likeStream');
+              if (snapshot.connectionState ==
+                  ConnectionState.waiting) {
+                return Text(
+                  'Loading...',
+                  style: Theme.of(context).textTheme.caption,
+                );
+              } else {
+                if (snapshot.hasData) {
+                  return Text(
+                    '${snapshot.data.docs.length}',
+                    style: Theme.of(context).textTheme.caption,
+                  );
+                } else {
+                  return Text(
+                    'Error!',
+                    style: Theme.of(context).textTheme.caption,
+                  );
+                }
+              }
+            },
           ),
           const Spacer(),
           BuildReactButton(
             icon: Icons.arrow_forward_ios_sharp,
             iconColor: blackColor,
-            onClick: () {},
+            onClick: onClickedToViewLikes,
           ),
         ],
       ),

@@ -9,17 +9,29 @@ import 'package:social_app/controller/new_message_controller.dart';
 import 'package:social_app/controller/user_profile_controller.dart';
 import 'package:social_app/model/message_model.dart';
 import 'package:social_app/model/user_model.dart';
+import 'package:social_app/states/messages_controller_states.dart';
 import 'package:social_app/states/new_message_controller_states.dart';
 import 'package:social_app/view/app_components.dart';
-import 'chat_details_view_components.dart';
+import 'messages_view_components.dart';
 
-class ChatDetailsView extends StatelessWidget {
+class MessagesView extends StatefulWidget {
   static const String id = 'ChatDetailsView';
   final UserModel receiverUser;
 
-  ChatDetailsView({@required this.receiverUser});
+  MessagesView({@required this.receiverUser});
 
+  @override
+  _MessagesViewState createState() => _MessagesViewState();
+}
+
+class _MessagesViewState extends State<MessagesView> {
   final TextEditingController _chatController = TextEditingController();
+
+  @override
+  void dispose() {
+    _chatController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,15 +39,15 @@ class ChatDetailsView extends StatelessWidget {
         (value) => value.userProfileData);
     return Scaffold(
       appBar: buildChatDetailsViewAppBar(context,
-          uImage: receiverUser.profileImageUrl,
-          uName: receiverUser.name, onPop: () {
+          uImage: widget.receiverUser.profileImageUrl,
+          uName: widget.receiverUser.name, onPop: () {
         Provider.of<NewMessageController>(context, listen: false)
             .removePickedImage();
       }),
       body: Builder(
         builder: (context) {
           Provider.of<MessagesController>(context, listen: false).getMessages(
-              senderId: senderData.uid, receiverId: receiverUser.uid);
+              senderId: senderData.uid, receiverId: widget.receiverUser.uid);
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Consumer<NewMessageController>(
@@ -48,34 +60,11 @@ class ChatDetailsView extends StatelessWidget {
                         Consumer<MessagesController>(
                           builder:
                               (context, messagesControllerProvider, child) {
-                            return ConditionalBuilder(
-                              condition:
-                                  messagesControllerProvider.messages.length >
-                                      0,
-                              builder: (_) => Expanded(
-                                child: ListView.separated(
-                                  physics: const BouncingScrollPhysics(),
-                                  reverse: true,
-                                  itemCount: messagesControllerProvider
-                                      .messages.length,
-                                  itemBuilder: (_, index) {
-                                    if (senderData.uid ==
-                                        messagesControllerProvider
-                                            .messages[index].senderId)
-                                      return _senderMessageBubble(context,
-                                          message: messagesControllerProvider
-                                              .messages[index],
-                                          senderUser: senderData);
-                                    return _receiverMessageBubble(
-                                        message: messagesControllerProvider
-                                            .messages[index],
-                                        receiverUser: receiverUser);
-                                  },
-                                  separatorBuilder: (_, index) =>
-                                      mediumVerticalDistance(),
-                                ),
-                              ),
-                              fallback: (_) => Expanded(
+                            if (messagesControllerProvider
+                                    .messagesControllerStates ==
+                                MessagesControllerStates
+                                    .MessagesControllerGetMessagesErrorState) {
+                              return Expanded(
                                 child: SingleChildScrollView(
                                   child: Column(
                                     children: [
@@ -85,13 +74,60 @@ class ChatDetailsView extends StatelessWidget {
                                                 0.2,
                                       ),
                                       BuildEmptyListWidget(
-                                        title: 'No messages available yet.',
+                                        title: messagesControllerProvider
+                                            .errorResult.errorMessage,
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                            );
+                              );
+                            } else {
+                              return ConditionalBuilder(
+                                condition:
+                                    messagesControllerProvider.messages.length >
+                                        0,
+                                builder: (_) => Expanded(
+                                  child: ListView.separated(
+                                    physics: const BouncingScrollPhysics(),
+                                    reverse: true,
+                                    itemCount: messagesControllerProvider
+                                        .messages.length,
+                                    itemBuilder: (_, index) {
+                                      if (senderData.uid ==
+                                          messagesControllerProvider
+                                              .messages[index].senderId)
+                                        return _senderMessageBubble(context,
+                                            message: messagesControllerProvider
+                                                .messages[index],
+                                            senderUser: senderData);
+                                      return _receiverMessageBubble(
+                                          message: messagesControllerProvider
+                                              .messages[index],
+                                          receiverUser: widget.receiverUser);
+                                    },
+                                    separatorBuilder: (_, index) =>
+                                        mediumVerticalDistance(),
+                                  ),
+                                ),
+                                fallback: (_) => Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.2,
+                                        ),
+                                        BuildEmptyListWidget(
+                                          title: 'No messages available yet.',
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
                           },
                         ),
                         minimumVerticalDistance(),
@@ -99,7 +135,8 @@ class ChatDetailsView extends StatelessWidget {
                           flex: 0,
                           child: BuildWriteContentWidget(
                             contentController: _chatController,
-                            contentImage: newMessageControllerProvider.messageImage,
+                            contentImage:
+                                newMessageControllerProvider.messageImage,
                             pickContentImage: () async {
                               await newMessageControllerProvider
                                   .pickMessageImage();
@@ -123,7 +160,7 @@ class ChatDetailsView extends StatelessWidget {
                                 await newMessageControllerProvider
                                     .uploadMessageImage(
                                   senderId: senderData.uid,
-                                  receiverId: receiverUser.uid,
+                                  receiverId: widget.receiverUser.uid,
                                   messageText: _chatController.text,
                                   messageDateTime: DateTime.now().toString(),
                                   messageTime: Timestamp.now(),
@@ -131,7 +168,7 @@ class ChatDetailsView extends StatelessWidget {
                               } else {
                                 await newMessageControllerProvider.sendMessage(
                                   senderId: senderData.uid,
-                                  receiverId: receiverUser.uid,
+                                  receiverId: widget.receiverUser.uid,
                                   messageText: _chatController.text,
                                   messageImage: '',
                                   messageDateTime: DateTime.now().toString(),
@@ -202,7 +239,6 @@ class ChatDetailsView extends StatelessWidget {
                             const SizedBox(
                               height: 51.0,
                             ),
-                            // minimumVerticalDistance(),
                           ],
                         ),
                       ),
@@ -213,146 +249,6 @@ class ChatDetailsView extends StatelessWidget {
           );
         },
       ),
-
-      ///
-      // body: StreamBuilder<QuerySnapshot>(
-      //   stream: FirebaseHelper.firestoreHelper
-      //       .collection(usersCollection)
-      //       .doc(senderData.uid)
-      //       .collection(chatsCollection)
-      //       .doc(receiverUser.uid)
-      //       .collection(messagesCollection)
-      //       .orderBy('messageTime', descending: true)
-      //       .snapshots(),
-      //   builder: (context, snapshot){
-      //     if(snapshot.connectionState == ConnectionState.waiting){
-      //       return buildCircularLoadingWidget();
-      //     }else{
-      //       List<MessageModel> messages = [];
-      //       for (var doc in snapshot.data.docs) {
-      //         var data = doc.data();
-      //         messages.add(MessageModel.fromJson(data));
-      //       }
-      //       return Padding(
-      //         padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      //         child: Column(
-      //           children: [
-      //             ConditionalBuilder(
-      //               condition: messages.length > 0,
-      //               builder: (_) => Expanded(
-      //                 child: ListView.separated(
-      //                   physics: const BouncingScrollPhysics(),
-      //                   reverse: true,
-      //                   itemCount: messages.length,
-      //                   itemBuilder: (_, index) {
-      //                     // List<MessageModel> messages = context.select<
-      //                     //     MessagesController,
-      //                     //     List<MessageModel>>((value) => value.messages);
-      //                     return senderMessageBubble(
-      //                         messages[index],
-      //                         senderData.uid ==
-      //                             messages[index].senderId);
-      //                     // if (senderData.uid ==
-      //                     //     provider.messages[index].senderId)
-      //                     //   return _senderMessageBubble(
-      //                     //       message: provider.messages[index],
-      //                     //       senderUser: senderData);
-      //                     // return _receiverMessageBubble(
-      //                     //     message: provider.messages[index],
-      //                     //     receiverUser: receiverUser);
-      //                     // if (senderData.uid ==
-      //                     //     provider.messages[index].senderId)
-      //                     // return receiverMessageBubble(provider.messages[index]);
-      //                     // return senderMessageBubble(provider.messages[index]);
-      //                   },
-      //                   separatorBuilder: (_, index) =>
-      //                       minimumVerticalDistance(),
-      //                 ),
-      //               ),
-      //               fallback: (_) => Expanded(
-      //                 child: SingleChildScrollView(
-      //                   child: Column(
-      //                     children: [
-      //                       SizedBox(
-      //                         height:
-      //                         MediaQuery.of(context).size.height * 0.2,
-      //                       ),
-      //                       BuildEmptyListWidget(
-      //                         title: 'No messages available yet.',
-      //                       ),
-      //                     ],
-      //                   ),
-      //                 ),
-      //               ),
-      //             ),
-      //             // if (provider.messages.length == 0) Spacer(),
-      //             minimumVerticalDistance(),
-      //             Consumer<NewMessageController>(
-      //               builder: (context, provider, child) {
-      //                 return Expanded(
-      //                   flex: 0,
-      //                   child: BuildWriteContentWidget(
-      //                     contentImage: provider.messageImage,
-      //                     contentController: _chatController,
-      //                     pickContentImage: () async {
-      //                       await provider.pickMessageImage();
-      //                       if (provider
-      //                           .newMessageControllerPickMessageImageStates ==
-      //                           NewMessageControllerPickMessageImageStates
-      //                               .MessageImagePickedErrorState) {
-      //                         ScaffoldMessenger.of(context).showSnackBar(
-      //                           buildDefaultSnackBar(
-      //                             context,
-      //                             key: UniqueKey(),
-      //                             contentText: provider.errorMessage,
-      //                           ),
-      //                         );
-      //                       }
-      //                     },
-      //                     sendContent: () async {
-      //                       if (provider.messageImage != null) {
-      //                         await provider.uploadMessageImage(
-      //                           senderId: senderData.uid,
-      //                           receiverId: receiverUser.uid,
-      //                           messageText: _chatController.text,
-      //                           // messageTime: DateTime.now().toString(),
-      //                           messageTime: Timestamp.now()
-      //                         );
-      //                       } else {
-      //                         await provider.sendMessage(
-      //                           senderId: senderData.uid,
-      //                           receiverId: receiverUser.uid,
-      //                           messageText: _chatController.text,
-      //                           messageImage: '',
-      //                           // messageTime: DateTime.now().toString(),
-      //                           messageTime: Timestamp.now(),
-      //                         );
-      //                       }
-      //                       if (provider
-      //                           .newMessageControllerSendMessageStates ==
-      //                           NewMessageControllerSendMessageStates
-      //                               .SendMessageErrorState) {
-      //                         ScaffoldMessenger.of(context).showSnackBar(
-      //                           buildDefaultSnackBar(
-      //                             context,
-      //                             key: UniqueKey(),
-      //                             contentText: provider.errorMessage,
-      //                           ),
-      //                         );
-      //                       }
-      //                       _chatController.clear();
-      //                     },
-      //                   ),
-      //                 );
-      //               },
-      //             ),
-      //           ],
-      //         ),
-      //       );
-      //     }
-      //   },
-      // ),
-      ///
     );
   }
 
@@ -372,8 +268,6 @@ class ChatDetailsView extends StatelessWidget {
                   Radius.circular(8.0),
                 ),
               ),
-              // color: Colors.transparent,
-              // elevation: 0.0,
               items: [
                 PopupMenuItem(
                   child: Text('Hello'),

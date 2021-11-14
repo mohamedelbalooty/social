@@ -46,7 +46,6 @@ class _NewPostViewState extends State<NewPostView> {
                   Navigator.pop(context);
                 },
               ),
-              titleSpacing: 0.0,
               actions: [
                 BuildDefaultTextButton(
                   title: 'Post'.toUpperCase(),

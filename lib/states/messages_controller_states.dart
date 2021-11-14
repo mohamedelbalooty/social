@@ -1,0 +1,4 @@
+enum MessagesControllerStates{
+  MessagesControllerGetMessagesSuccessState,
+  MessagesControllerGetMessagesErrorState
+}

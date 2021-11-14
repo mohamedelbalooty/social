@@ -4,7 +4,7 @@ import 'package:social_app/icon_broken.dart';
 import 'package:social_app/provider/bottom_nav_bar_provider.dart';
 import 'package:social_app/states/bottom_nav_bar_states.dart';
 import 'package:social_app/view/chats_view/chats_view.dart';
-import 'package:social_app/view/feeds_view/feeds_view.dart';
+import 'package:social_app/view/home_view/home_view.dart';
 import 'package:social_app/view/new_post_view/new_post_view.dart';
 import 'package:social_app/view/settings_view/settings_view.dart';
 import 'package:social_app/view/users/users_view.dart';

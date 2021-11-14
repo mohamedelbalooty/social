@@ -1,0 +1,4 @@
+enum LikesControllerStates{
+  LikesControllerGetLikesSuccessState,
+  LikesControllerGetLikesErrorState
+}

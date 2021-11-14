@@ -4,12 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:social_app/controller/chat_controller.dart';
 import 'package:social_app/states/chats_controller_states.dart';
 import 'package:social_app/view/app_components.dart';
-import 'package:social_app/view/chat_details_view/chat_details_view.dart';
+import 'package:social_app/view/messages_view/messages_view.dart';
 import 'chat_view_components.dart';
 
 class ChatsView extends StatelessWidget {
-  static const String id = 'ChatView';
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ChatsController>(
@@ -32,11 +30,10 @@ class ChatsView extends StatelessWidget {
                   uName: provider.users[index].name,
                   uImage: provider.users[index].profileImageUrl,
                   onClick: () {
-                    Navigator.push(
+                    materialNavigateTo(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            ChatDetailsView(receiverUser: provider.users[index]),
+                      MessagesView(
+                        receiverUser: provider.users[index],
                       ),
                     );
                   },

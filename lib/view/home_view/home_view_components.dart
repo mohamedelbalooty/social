@@ -2,63 +2,41 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/constants/colors_constants.dart';
 import 'package:social_app/constants/firestore_constants.dart';
-import 'package:social_app/helper/firebase_helper.dart';
-import 'package:social_app/helper/user_id_helper.dart';
 import 'package:social_app/model/post_model.dart';
 import '../../icon_broken.dart';
 import '../app_components.dart';
 
-class BuildReactButton extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final double iconSize;
-  final Function onClick;
-
-  const BuildReactButton(
-      {@required this.icon,
-      @required this.iconColor,
-      @required this.onClick,
-      this.iconSize = 18.0});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onClick,
-      child: Icon(
-        icon,
-        size: iconSize,
-        color: iconColor,
-      ),
-      highlightColor: iconColor.withOpacity(0.3),
-      splashColor: iconColor.withOpacity(0.2),
-    );
-  }
-}
-
 class BuildPostItem extends StatelessWidget {
   final String postDocId;
-  final String image;
+  final String uImage;
   final PostModel post;
-  final Function addLike, deleteLike, commentOnPost;
-  final Stream likeStream, commentStream;
+  final Function commentOnPost, addLike, deleteLike;
+  final Stream<QuerySnapshot> likesStream, commentStream;
+  final Stream<DocumentSnapshot> likeButtonStream;
 
   const BuildPostItem(
       {@required this.postDocId,
       @required this.post,
-      @required this.image,
+      @required this.uImage,
+      @required this.commentOnPost,
       @required this.addLike,
       @required this.deleteLike,
-      @required this.commentOnPost,
-      @required this.likeStream,
-      @required this.commentStream});
+      @required this.likesStream,
+      @required this.commentStream,
+      @required this.likeButtonStream});
 
   @override
   Widget build(BuildContext context) {
     print('BuildPostItem');
     return Card(
-      elevation: 5.0,
+      elevation: 8.0,
       margin: const EdgeInsets.symmetric(horizontal: 8.0),
-      clipBehavior: Clip.antiAliasWithSaveLayer,
+      shape: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(8.0),
+        ),
+        borderSide: const BorderSide(color: transparentColor),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
         child: Column(
@@ -70,30 +48,17 @@ class BuildPostItem extends StatelessWidget {
                   image: NetworkImage(post.uImage),
                   imageRadius: 20.0,
                 ),
-                const SizedBox(
-                  width: 15.0,
-                ),
+                mediumHorizontalDistance(),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            post.uName,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyText2
-                                .copyWith(height: 1.4),
-                          ),
-                          minimumHorizontalDistance(),
-                          const Icon(
-                            Icons.check_circle,
-                            color: Colors.blueAccent,
-                            size: 15.0,
-                          ),
-                        ],
+                      Text(
+                        post.uName,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyText2
+                            .copyWith(height: 1.4),
                       ),
                       Text(
                         post.datetime,
@@ -104,7 +69,7 @@ class BuildPostItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(),
+                // SizedBox(),
                 InkWell(
                   child: const Icon(
                     IconBroken.More_Circle,
@@ -115,17 +80,18 @@ class BuildPostItem extends StatelessWidget {
                 ),
               ],
             ),
-            buildDefaultDivider(height: 20.0),
-            Text(
-              post.postText,
-              style: Theme.of(context).textTheme.subtitle1,
-              textAlign: TextAlign.justify,
-            ),
-            minimumVerticalDistance(),
+            buildDefaultDivider(height: 10.0),
+            if (post.postText != '')
+              Text(
+                post.postText,
+                style: Theme.of(context).textTheme.subtitle1,
+                textAlign: TextAlign.justify,
+              ),
+            if (post.postImage != '') minimumVerticalDistance(),
             if (post.postImage != '')
               ClipRRect(
                 borderRadius: const BorderRadius.all(
-                  Radius.circular(4.0),
+                  Radius.circular(8.0),
                 ),
                 child: BuildCachedNetworkImage(
                   url: post.postImage,
@@ -144,8 +110,8 @@ class BuildPostItem extends StatelessWidget {
                       size: 18.0,
                     ),
                     minimumHorizontalDistance(),
-                    StreamBuilder(
-                      stream: likeStream,
+                    StreamBuilder<QuerySnapshot>(
+                      stream: likesStream,
                       builder: (context, snapshot) {
                         print('likeStream');
                         if (snapshot.connectionState ==
@@ -179,7 +145,7 @@ class BuildPostItem extends StatelessWidget {
                       color: Colors.amber,
                     ),
                     minimumHorizontalDistance(),
-                    StreamBuilder(
+                    StreamBuilder<QuerySnapshot>(
                       stream: commentStream,
                       builder: (context, snapshot) {
                         print('commentStream');
@@ -208,13 +174,13 @@ class BuildPostItem extends StatelessWidget {
                 ),
               ],
             ),
-            buildDefaultDivider(height: 15.0),
+            buildDefaultDivider(height: 10.0),
             minimumVerticalDistance(),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 BuildUserCircleImage(
-                  image: NetworkImage(image ?? errorImage),
+                  image: NetworkImage(uImage ?? errorImage),
                   imageRadius: 15.0,
                 ),
                 minimumHorizontalDistance(),
@@ -227,15 +193,11 @@ class BuildPostItem extends StatelessWidget {
                 ),
                 const Spacer(),
                 StreamBuilder<DocumentSnapshot>(
-                  stream: FirebaseHelper.firestoreHelper
-                      .collection(postsCollection)
-                      .doc(postDocId)
-                      .collection(likesCollection)
-                      .doc(UserIdHelper.currentUid)
-                      .snapshots(),
+                  stream: likeButtonStream,
                   builder: (context, docSnapshot) {
+                    print('like button stream');
                     if (!docSnapshot.hasData) {
-                      return Icon(
+                      return const Icon(
                         IconBroken.Heart,
                         color: greyColor,
                         size: 18.0,
@@ -246,17 +208,13 @@ class BuildPostItem extends StatelessWidget {
                         icon: Icons.favorite,
                         iconColor: Colors.red,
                         iconSize: 20.0,
-                        onClick: () async {
-                          await addLikes(true, postDocId);
-                        },
+                        onClick: addLike,
                       );
                     } else {
                       return BuildReactButton(
                         icon: Icons.favorite_border,
                         iconColor: greyColor,
-                        onClick: () async{
-                           await addLikes(false, postDocId);
-                        },
+                        onClick: deleteLike,
                       );
                     }
                   },
@@ -273,43 +231,25 @@ class BuildPostItem extends StatelessWidget {
       ),
     );
   }
-}
 
-// Future<void> like(postDocId) async{
-//   await FirebaseHelper.firestoreHelper
+// Future<void> _addLikes(bool liked) async {
+//   // / LikeModel likeModel = LikeModel(
+//   //   liked: true,
+//   //   uName: uName,
+//   //   uImage: uImage
+//   // );
+//   var ref = FirebaseHelper.firestoreHelper
 //       .collection(postsCollection)
 //       .doc(postDocId)
 //       .collection(likesCollection)
-//       .doc(UserIdHelper.currentUid)
-//       .set({
-//     'liked': true,
-//   });
+//       .doc(UserIdHelper.currentUid);
+//   liked = !liked;
+//   if (liked) {
+//     await ref.set({
+//       'liked': true,
+//     });
+//   } else {
+//     await ref.delete();
+//   }
 // }
-//
-//  unLike(postDocId)  {
-//    FirebaseHelper.firestoreHelper
-//       .collection(postsCollection)
-//       .doc(postDocId)
-//       .collection(likesCollection)
-//       .doc(UserIdHelper.currentUid).delete();
-// }
-
-
-Future<void> addLikes(bool liked, postDocId) async {
-  liked = !liked;
-  if (liked) {
-   await FirebaseHelper.firestoreHelper
-        .collection(postsCollection)
-        .doc(postDocId)
-        .collection(likesCollection)
-        .doc(UserIdHelper.currentUid).set({
-      'liked': true,
-    });
-  } else {
-    await FirebaseHelper.firestoreHelper
-        .collection(postsCollection)
-        .doc(postDocId)
-        .collection(likesCollection)
-        .doc(UserIdHelper.currentUid).delete();
-  }
 }

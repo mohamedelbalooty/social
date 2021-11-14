@@ -434,11 +434,10 @@ class BuildDefaultCircleIconButton extends StatelessWidget {
   final double radius, iconSize;
   final Function onClick;
 
-  const BuildDefaultCircleIconButton(
-      {@required this.onClick,
-      @required this.icon,
-      this.radius = 25.0,
-      this.iconSize = 18.0});
+  const BuildDefaultCircleIconButton({@required this.onClick,
+    @required this.icon,
+    this.radius = 25.0,
+    this.iconSize = 18.0});
 
   @override
   Widget build(BuildContext context) {
@@ -450,7 +449,6 @@ class BuildDefaultCircleIconButton extends StatelessWidget {
         height: radius,
         width: radius,
         decoration: BoxDecoration(
-          // color: lightMainColor,
           color: mainColor,
           shape: BoxShape.circle,
           border: Border.all(color: mainColor, width: 1.0),
@@ -505,10 +503,14 @@ class BuildDefaultButton extends StatelessWidget {
         child: Center(
           child: Text(
             buttonName,
-            style: Theme.of(context).textTheme.bodyText1.copyWith(
-                  color: buttonNameColor,
-                  fontSize: 16.0,
-                ),
+            style: Theme
+                .of(context)
+                .textTheme
+                .bodyText1
+                .copyWith(
+              color: buttonNameColor,
+              fontSize: 16.0,
+            ),
           ),
         ),
       ),
@@ -526,7 +528,7 @@ class BuildDefaultOutlinedButton extends StatelessWidget {
     @required this.onClick,
     this.height = 40.0,
     this.width = double.infinity,
-    this.borderRadiusValue = 4.0,
+    this.borderRadiusValue = 8.0,
   });
 
   @override
@@ -560,27 +562,56 @@ class BuildDefaultTextButton extends StatelessWidget {
   final Color buttonColor;
   final double textSize;
 
-  const BuildDefaultTextButton(
-      {@required this.onClick,
-      @required this.title,
-      @required this.buttonColor,
-      this.textSize = 16.0});
+  const BuildDefaultTextButton({@required this.onClick,
+    @required this.title,
+    @required this.buttonColor,
+    this.textSize = 16.0});
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       style: ButtonStyle(
         overlayColor: MaterialStateColor.resolveWith(
-            (states) => mainColor.withOpacity(0.1)),
+                (states) => mainColor.withOpacity(0.1)),
       ),
       onPressed: onClick,
       child: Text(
         title,
-        style: Theme.of(context).textTheme.bodyText1.copyWith(
-              color: buttonColor,
-              fontSize: textSize,
-            ),
+        style: Theme
+            .of(context)
+            .textTheme
+            .bodyText1
+            .copyWith(
+          color: buttonColor,
+          fontSize: textSize,
+        ),
       ),
+    );
+  }
+}
+
+class BuildReactButton extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final double iconSize;
+  final Function onClick;
+
+  const BuildReactButton({@required this.icon,
+    @required this.iconColor,
+    @required this.onClick,
+    this.iconSize = 18.0});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onClick,
+      child: Icon(
+        icon,
+        size: iconSize,
+        color: iconColor,
+      ),
+      highlightColor: iconColor.withOpacity(0.3),
+      splashColor: iconColor.withOpacity(0.2),
     );
   }
 }
@@ -600,9 +631,10 @@ class BuildCachedNetworkImage extends StatelessWidget {
       width: width,
       fit: BoxFit.cover,
       placeholder: (context, url) => buildCircularLoadingWidget(),
-      errorWidget: (context, url, error) => Center(
-        child: Icon(Icons.error),
-      ),
+      errorWidget: (context, url, error) =>
+          Center(
+            child: Icon(Icons.error),
+          ),
     );
   }
 }
@@ -625,11 +657,10 @@ class BuildUserCircleImage extends StatelessWidget {
   }
 }
 
-AppBar buildDefaultAppBar(
-        {@required String title,
-        double titleSpacing,
-        Widget leading,
-        List<Widget> actions}) =>
+AppBar buildDefaultAppBar({@required String title,
+  double titleSpacing = 0.0,
+  Widget leading,
+  List<Widget> actions}) =>
     AppBar(
       title: Text(
         title,
@@ -688,11 +719,10 @@ class BuildWriteContentWidget extends StatefulWidget {
   final Function sendContent, pickContentImage;
   final File contentImage;
 
-  const BuildWriteContentWidget(
-      {@required this.contentController,
-      @required this.sendContent,
-      @required this.pickContentImage,
-      @required this.contentImage});
+  const BuildWriteContentWidget({@required this.contentController,
+    @required this.sendContent,
+    @required this.pickContentImage,
+    @required this.contentImage});
 
   @override
   _BuildWriteContentWidgetState createState() =>
@@ -757,14 +787,14 @@ class _BuildWriteContentWidgetState extends State<BuildWriteContentWidget> {
                       ),
                       InkWell(
                         onTap: _textFieldContent == '' &&
-                                widget.contentImage == null
+                            widget.contentImage == null
                             ? () {}
                             : () {
-                                widget.sendContent();
-                                setState(() {
-                                  _textFieldContent = '';
-                                });
-                              },
+                          widget.sendContent();
+                          setState(() {
+                            _textFieldContent = '';
+                          });
+                        },
                         child: Container(
                           height: 40.0,
                           width: 40.0,
@@ -775,7 +805,7 @@ class _BuildWriteContentWidgetState extends State<BuildWriteContentWidget> {
                               size: _textFieldContent == '' &&
                                   widget.contentImage == null ? 20.0 : 22.0,
                               color: _textFieldContent == '' &&
-                                      widget.contentImage == null
+                                  widget.contentImage == null
                                   ? Colors.grey
                                   : whiteColor,
                             ),
@@ -816,7 +846,10 @@ class BuildErrorResultWidget extends StatelessWidget {
             ),
             Text(
               errorMessage,
-              style: Theme.of(context).textTheme.bodyText1,
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .bodyText1,
             ),
           ],
         ),
@@ -850,7 +883,11 @@ class BuildEmptyListWidget extends StatelessWidget {
             ),
             Text(
               title,
-              style: Theme.of(context).textTheme.bodyText1.copyWith(
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .bodyText1
+                  .copyWith(
                   color: greyColor, fontWeight: FontWeight.normal, height: 1.0),
             ),
           ],
@@ -865,10 +902,9 @@ class BuildPlatformRefreshIndicator extends StatelessWidget {
   final Future Function() onRefresh;
   final Widget child;
 
-  BuildPlatformRefreshIndicator(
-      {@required this.refreshKey,
-      @required this.onRefresh,
-      @required this.child});
+  BuildPlatformRefreshIndicator({@required this.refreshKey,
+    @required this.onRefresh,
+    @required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -895,7 +931,8 @@ class BuildPlatformRefreshIndicator extends StatelessWidget {
   }
 }
 
-Center buildCircularLoadingWidget() => const Center(
+Center buildCircularLoadingWidget() =>
+    const Center(
       child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(mainColor)),
     );
@@ -904,21 +941,29 @@ LinearProgressIndicator buildLinearLoadingWidget() =>
     const LinearProgressIndicator(
         valueColor: AlwaysStoppedAnimation<Color>(mainColor));
 
-SizedBox mediumVerticalDistance() => const SizedBox(
+SizedBox mediumVerticalDistance() =>
+    const SizedBox(
       height: 10.0,
     );
 
-SizedBox mediumHorizontalDistance() => const SizedBox(
+SizedBox mediumHorizontalDistance() =>
+    const SizedBox(
       width: 10.0,
     );
 
-SizedBox minimumHorizontalDistance() => const SizedBox(
+SizedBox minimumHorizontalDistance() =>
+    const SizedBox(
       width: 5.0,
     );
 
-SizedBox minimumVerticalDistance() => const SizedBox(
+SizedBox minimumVerticalDistance() =>
+    const SizedBox(
       height: 5.0,
     );
+
+void materialNavigateTo(BuildContext context, Widget screenView) {
+  Navigator.push(context, MaterialPageRoute(builder: (_) => screenView),);
+}
 
 void namedNavigateTo(BuildContext context, String routeName, {arguments}) {
   Navigator.pushNamed(context, routeName, arguments: arguments);
@@ -941,7 +986,8 @@ SnackBar buildDefaultSnackBar(context,
           child: Text(
             contentText,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context)
+            style: Theme
+                .of(context)
                 .textTheme
                 .bodyText2
                 .copyWith(color: whiteColor, fontWeight: FontWeight.normal),
@@ -965,7 +1011,8 @@ SnackBar buildDefaultSnackBar(context,
             child: Center(
               child: Text(
                 label ?? 'ok',
-                style: Theme.of(context)
+                style: Theme
+                    .of(context)
                     .textTheme
                     .bodyText2
                     .copyWith(color: whiteColor, fontWeight: FontWeight.normal),

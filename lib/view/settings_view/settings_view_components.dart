@@ -46,29 +46,12 @@ class BuildProfileCoverImages extends StatelessWidget {
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          // Align(
-          //   alignment: Alignment.topCenter,
-          //   child: Container(
-          //     height: 130.0,
-          //     width: double.infinity,
-          //     decoration: BoxDecoration(
-          //       borderRadius: const BorderRadius.only(
-          //         topLeft: Radius.circular(4.0),
-          //         topRight: Radius.circular(4.0),
-          //       ),
-          //       image: DecorationImage(
-          //         image: NetworkImage(coverImage),
-          //         fit: BoxFit.cover,
-          //       ),
-          //     ),
-          //   ),
-          // ),
           Align(
             alignment: Alignment.topCenter,
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(4.0),
-                topRight: Radius.circular(4.0),
+                topLeft: Radius.circular(8.0),
+                topRight: Radius.circular(8.0),
               ),
               child: BuildCachedNetworkImage(
                 url: coverImage,

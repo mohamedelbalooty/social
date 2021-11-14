@@ -4,19 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:social_app/constants/colors_constants.dart';
 import 'package:social_app/controller/comments_controller.dart';
+import 'package:social_app/controller/likes_number_controller.dart';
 import 'package:social_app/controller/user_profile_controller.dart';
 import 'package:social_app/model/user_model.dart';
 import 'package:social_app/controller/new_comment_controller.dart';
 import 'package:social_app/states/comments_controller_stats.dart';
 import 'package:social_app/states/new_comment_controller_states.dart';
 import '../app_components.dart';
+import '../likes_view/likes_view.dart';
 import 'comments_view_components.dart';
 
 class CommentsView extends StatefulWidget {
-  static const String id = 'CommentsView';
+  final String postDocId;
 
-  // final String postId;
-  // final
+  const CommentsView({@required this.postDocId});
 
   @override
   _CommentsViewState createState() => _CommentsViewState();
@@ -33,18 +34,19 @@ class _CommentsViewState extends State<CommentsView> {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> receptors = ModalRoute.of(context).settings.arguments;
     final UserModel _userProfileData =
         context.select<UserProfileController, UserModel>(
             (value) => value.userProfileData);
+    final LikesNumberController _likesNumberController =
+        Provider.of<LikesNumberController>(context);
     return Scaffold(
       body: Builder(
         builder: (context) {
           Provider.of<CommentsController>(context, listen: false)
-              .getComments(postDocId: receptors['postId']);
+              .getComments(postDocId: widget.postDocId);
           return SafeArea(
             child: Container(
-              height: MediaQuery.of(context).size.height,
+              height: double.infinity,
               width: double.infinity,
               color: whiteColor,
               child: Padding(
@@ -57,7 +59,15 @@ class _CommentsViewState extends State<CommentsView> {
                         Column(
                           children: [
                             BuildLikesNumberWidget(
-                              likesNumber: receptors['likesNumber'],
+                              likesStream: _likesNumberController
+                                  .getLikesNumber(postDocId: widget.postDocId),
+                              onClickedToViewLikes: () {
+                                materialNavigateTo(
+                                    context,
+                                    LikesView(
+                                      postDocId: widget.postDocId,
+                                    ));
+                              },
                             ),
                             Consumer<CommentsController>(
                               builder:
@@ -67,11 +77,21 @@ class _CommentsViewState extends State<CommentsView> {
                                     CommentsControllerStates
                                         .CommentsControllerGetCommentsErrorState) {
                                   return Expanded(
-                                    child: BuildErrorResultWidget(
-                                      errorImage: commentsControllerProvider
-                                          .errorResult.errorImage,
-                                      errorMessage: commentsControllerProvider
-                                          .errorResult.errorMessage,
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        children: [
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.2,
+                                          ),
+                                          BuildEmptyListWidget(
+                                            title: commentsControllerProvider
+                                                .errorResult.errorMessage,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 } else {
@@ -162,7 +182,7 @@ class _CommentsViewState extends State<CommentsView> {
                                       null) {
                                     newCommentControllerProvider
                                         .uploadCommentImage(
-                                            postDocId: receptors['postId'],
+                                            postDocId: widget.postDocId,
                                             uName: _userProfileData.name,
                                             uImage: _userProfileData
                                                 .profileImageUrl,
@@ -189,7 +209,7 @@ class _CommentsViewState extends State<CommentsView> {
                                   } else {
                                     newCommentControllerProvider
                                         .createCommentOnPost(
-                                      postDocId: receptors['postId'],
+                                      postDocId: widget.postDocId,
                                       uName: _userProfileData.name,
                                       uImage: _userProfileData.profileImageUrl,
                                       commentText: _commentController.text,
@@ -214,9 +234,6 @@ class _CommentsViewState extends State<CommentsView> {
                                     }
                                   }
                                   _commentController.clear();
-
-                                  ///UNFOCUS
-                                  // FocusScope.of(context).unfocus();
                                 },
                               ),
                             ),
@@ -268,7 +285,6 @@ class _CommentsViewState extends State<CommentsView> {
                                 const SizedBox(
                                   height: 51.0,
                                 ),
-                                // minimumVerticalDistance(),
                               ],
                             ),
                           ),

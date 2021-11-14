@@ -675,12 +675,11 @@ class _EditProfileViewState extends State<EditProfileView> {
       appBar: buildDefaultAppBar(
         title: 'Edit Profile',
         leading: BuildDefaultIconButton(
-          icon: const Icon(IconBroken.Arrow___Left_2),
+          icon: const Icon(IconBroken.Arrow___Left),
           onClick: () {
             Navigator.pop(context);
           },
         ),
-        titleSpacing: 0.0,
         actions: [
           Consumer<EditProfileController>(
             builder: (context, provider, child) {
@@ -1013,8 +1012,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(4.0),
-                                    topRight: Radius.circular(4.0),
+                                    topLeft: Radius.circular(8.0),
+                                    topRight: Radius.circular(8.0),
                                   ),
                                   image: DecorationImage(
                                     image: provider.coverImage == null
@@ -1054,8 +1053,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                               height: 150.0,
                               width: 150.0,
                               decoration: BoxDecoration(
-                                color:
-                                    Theme.of(context).scaffoldBackgroundColor,
+                                color: Theme.of(context).scaffoldBackgroundColor,
                                 shape: BoxShape.circle,
                               ),
                               child: Padding(
@@ -1069,30 +1067,34 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 ),
                               ),
                             ),
-                            BuildDefaultCircleIconButton(
-                              icon: IconBroken.Image,
-                              onClick: () async {
-                                await provider.pickProfileImage();
-                                if (provider.userProfileControllerImageStates ==
-                                    UserProfileControllerPickedImageStates
-                                        .ProfileImagePickedErrorState) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    buildDefaultSnackBar(
-                                      context,
-                                      key: UniqueKey(),
-                                      contentText:
-                                          provider.errorResult.errorMessage,
-                                    ),
-                                  );
-                                }
-                              },
+                            PositionedDirectional(
+                              end: 5.0,
+                              bottom: 10.0,
+                              child: BuildDefaultCircleIconButton(
+                                icon: IconBroken.Image,
+                                onClick: () async {
+                                  await provider.pickProfileImage();
+                                  if (provider.userProfileControllerImageStates ==
+                                      UserProfileControllerPickedImageStates
+                                          .ProfileImagePickedErrorState) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      buildDefaultSnackBar(
+                                        context,
+                                        key: UniqueKey(),
+                                        contentText:
+                                            provider.errorResult.errorMessage,
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
                             ),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  constDistance(),
+                  mediumVerticalDistance(),
                   if (provider.coverImage != null ||
                       provider.profileImage != null)
                     Row(

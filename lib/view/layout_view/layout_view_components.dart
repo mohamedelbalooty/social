@@ -40,7 +40,7 @@ class BuildBottomNavBar extends StatelessWidget {
             label: 'Post',
           ),
           _buildBottomNavigationBarItem(
-            icon: Icon(IconBroken.Location),
+            icon: Icon(IconBroken.User1),
             label: 'Users',
           ),
           _buildBottomNavigationBarItem(
